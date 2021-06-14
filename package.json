@@ -1,0 +1,26 @@
+{
+  "name": "project-zero",
+  "version": "1.0.0",
+  "description": "A simple Elearning LMS in node.js and express.js",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Salik47/Project-Zero.git"
+  },
+  "keywords": [
+    "node",
+    "npm",
+    "express",
+    "elearning",
+    "lms"
+  ],
+  "author": "Mohammed Salik Mulla",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Salik47/Project-Zero/issues"
+  },
+  "homepage": "https://github.com/Salik47/Project-Zero#readme"
+}
