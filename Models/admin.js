@@ -21,19 +21,12 @@ const userSchema = new mongoose.Schema({
         minlength: 8,
         maxlength: 1024
     },
-    // grade: {
-    //     type: Number,
-    //     required: true
-    // },
-    // division: {
-    //     type: String,
-    //     required: true
-    // },
-    // subjects: {
-    //     type: Array,
-    //     required: true,
-    //     default: []
-    // }
+    phoneNumber: {
+        type: Number,
+        required: true,
+        trim: true,
+        unique: 10
+    }
 });
 
 module.exports = User = mongoose.model('user', userSchema);
