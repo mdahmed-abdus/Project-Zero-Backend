@@ -5,7 +5,7 @@ const {verifyToken } = require('../../middleware/auth');
 const brcypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const config = require('config');
-const User = require('../../models/User');
+const User = require('../../Models/admin');
 
 // @route  GET api/auth 
 // @desc   Test route
@@ -28,8 +28,8 @@ module.exports = router;
 
 router.post('/', 
     [ 
-    check('email', 'Please include a valid email').isEmail(),
-    check('password', 'Password is required').exists(),
+    check('email', 'Please recheck your email').isEmail(),
+    check('password', 'Please recheck your password').isLength({ min: 8 }),
     ],
     async(req, res) => {
     const errors = validationResult(req);
@@ -69,6 +69,16 @@ router.post('/',
             console.error(err.message);
             res.status(500).send('Server error');
         }
+
+        server.get("/logout",auth,async(req,res)=>{
+            try{
+                res.clear
+                console.log('logout successfully');
+            }
+            catch(error){
+                res.status(400).send(error); 
+            }
+        })
     
     // res.send('Users Route')
 });

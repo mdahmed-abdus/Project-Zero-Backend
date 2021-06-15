@@ -14,10 +14,14 @@ const verifyToken = (req, res, next) => {
         );
     };
 
-    // Token Verification
+
     try {
         const decoded = jwt.verify(token, config.get('jwtSecret'));
         req.user = decoded.user;
+
+        req.token=token;
+        req.user=user; 
+
         next();
     } catch(err) {
         res.status.json(

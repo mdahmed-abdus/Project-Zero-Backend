@@ -9,18 +9,24 @@ const config = require('config');
 // @desc   Test route
 // @access Public
 
-const User = require('../../models/User');
+const User = require('../../Models/admin');
 
-router.post('/', [ check('name', 'Name is Required').not().isEmpty(),
-    check('email', 'Email is required').isEmail(),
-    check('password', 'Password is required').isLength({ min: 6 })],
+router.post('/', [ 
+    check('name', 'Please enter the name correctly').isAlpha(),
+    check('email', 'Email is required')
+        .isEmail(),
+    check('password', 'Please enter a valid password')
+        .isLength({ min: 8 }),
+    check('phoneNumber', 'Please enter a valid phone number')
+        .isLength({ min: 10, max: 10 })
+    ],
     async(req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
         }
     
-        const { name, email, password } = req.body;
+        const { name, email, password, phoneNumber } = req.body;
         try {
             //See if user exists
             let user = await User.findOne({ email });
@@ -31,7 +37,8 @@ router.post('/', [ check('name', 'Name is Required').not().isEmpty(),
             user = new User({
                 name,
                 email,
-                password
+                password,
+                phoneNumber
             });
 
             //Encrypt password
@@ -60,6 +67,7 @@ router.post('/', [ check('name', 'Name is Required').not().isEmpty(),
             console.error(err.message);
             res.status(500).send('Server error');
         }
+
     
     // res.send('Users Route')
 });
