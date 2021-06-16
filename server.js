@@ -16,9 +16,8 @@ app.get('/', (req, res) => res.send('API Running'));
 //Define Routes
 app.use('/api/admin/sign-up', require('./routes/api/admin'));
 app.use('/api/admin/sign-in', require('./routes/api/auth'));
-app.use('/api/profile', require('./routes/api/profile'));
-app.use('/api/posts', require('./routes/api/posts'));
-app.use('/api/logout', require('./routes/api/logout'));
+app.use('/api/admin/students', require('./routes/api/students'));
+// app.use('/api/logout', require('./routes/api/logout'));
 
 
 const PORT = process.env.PORT || 5000;
