@@ -27,8 +27,12 @@ router.get('/', verifyToken, async (req, res) => {
 
 router.post('/', 
     [ 
-    check('email', 'Please recheck your email').isEmail(),
-    check('password', 'Please recheck your password').isLength({ min: 8 }),
+    check('email', 'Please recheck your email')
+        .isEmail(),
+        //.matches("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$"),,
+    check('password', 'Please recheck your password')
+        .isLength({ min: 8 }),
+        //.matches('/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/'),
     ],
     async(req, res) => {
     const errors = validationResult(req);

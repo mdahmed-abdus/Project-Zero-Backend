@@ -20,10 +20,12 @@ const studentSchema = new mongoose.Schema({
         required: true,
         unique: 10,
     },
-    year: {
-        type: Number,
+    enrollmentStatus: 
+    {
+        type: Boolean,
         required: true,
-    },
+        default: false
+    }
     // subjects: {
     //     type: Array,
     //     required: true,

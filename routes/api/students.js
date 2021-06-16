@@ -11,32 +11,32 @@ const Student = require('../../models/student');
 router.post('/create-student', verifyToken, [       
             check('name', 'Name is Required').not().isEmpty(),
             check('phone', 'phone is required').isNumeric(),
-            check('year', 'year of study is required').isNumeric()
+            check('enrollmentStatus', 'status of enrollment is required').isBoolean()
         ], async(req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
-        const { name, email, phone, year } = req.body;
+        const { name, email, phone, enrollmentStatus } = req.body;
         try {
             // See if student exists
             let student = await Student.findOne({ phone });
             if (student) {
-                res.status(400).json({errors:[{msg:"student Already Exist"}]});
+                res.status(400).json({errors:[{msg:"Student already exists"}]});
             }
 
             if (!req.body.email) {
                     student = new Student({
                     name,
                     phone,
-                    year
+                    enrollmentStatus
                 }); 
             } else {
                 student = new Student({
                     name,
                     email,
                     phone,
-                    year
+                    enrollmentStatus
                 });
             }
             student.save();
@@ -78,6 +78,54 @@ router.get('/list-students', verifyToken, async(req, res) => {
             }
         });
         res.json(students);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route  POST api/students
+// @desc   get list of all the enrolled students
+// @access Private
+
+router.get("/list-enrolled-students", verifyToken, async(req, res) => {
+    try {
+        const query = {enrollmentStatus: true};
+        const enrolledStudents = await Student.find( query,
+            (err, enrolledStudents) => {
+                if (!enrolledStudents) {
+                   return res.status(404).json(
+                       {
+                           msg: "No enrolled students",
+                       }
+                   );
+                }
+            });
+            res.json(enrolledStudents);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route  POST api/students
+// @desc   get all the enrolled students enrollment status
+// @access Private
+
+router.get("/list-enquiry-students", verifyToken, async(req, res) => {
+    try {
+        const query = {enrollmentStatus: false};
+        const enquiredStudents = await Student.find( query,
+            (err, enquiredStudents) => {
+                if (!enquiredStudents) {
+                   return res.status(404).json(
+                       {
+                           msg: "No enolled students",
+                       }
+                   );
+                }
+            });
+            res.json(enquiredStudents);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');

@@ -15,8 +15,10 @@ router.post('/', [
     check('name', 'Please enter the name correctly').isAlpha(),
     check('email', 'Email is required')
         .isEmail(),
+        //.matches("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$"),
     check('password', 'Please enter a valid password')
         .isLength({ min: 8 }),
+        //.matches('/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/'),
     check('phoneNumber', 'Please enter a valid phone number')
         .isLength({ min: 10, max: 10 })
     ],
