@@ -60,17 +60,12 @@ router.post('/', [
                 {expiresIn: 360000}, 
                 (err, token)=> {
                     if (err) throw err;
-                    res.json({token})
-                    console.log("Registration Successful");
+                    res.send("Registration Successful");
                 });
         } catch (err) {
             console.error(err.message);
             res.status(500).send('Server error');
         }
-
-    
-    // res.send('Users Route')
 });
-
 
 module.exports = router;

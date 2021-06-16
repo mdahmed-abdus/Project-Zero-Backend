@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { check, validationResult } = require('express-validator');
-const {verifyToken } = require('../../middleware/auth');
+const { verifyToken } = require('../../middleware/auth');
 const brcypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const config = require('config');
@@ -20,7 +20,6 @@ router.get('/', verifyToken, async (req, res) => {
         res.status(500).send('Server Error');
     }
 });
-module.exports = router;
 
 // @route  POST api/auth
 // @desc   Authenticate user and login
@@ -70,7 +69,7 @@ router.post('/',
             res.status(500).send('Server error');
         }
 
-        server.get("/logout",auth,async(req,res)=>{
+        /* server.get("/logout",auth,async(req,res)=>{
             try{
                 res.clear
                 console.log('logout successfully');
@@ -78,7 +77,10 @@ router.post('/',
             catch(error){
                 res.status(400).send(error); 
             }
-        })
+        }) */
     
     // res.send('Users Route')
 });
+
+
+module.exports = router;

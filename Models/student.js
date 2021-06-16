@@ -24,20 +24,6 @@ const studentSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-    // password: {
-    //     type: String,
-    //     required: true,
-    //     minlength: 8,
-    //     maxlength: 1024
-    // },
-    // grade: {
-    //     type: Number,
-    //     required: true
-    // },
-    // division: {
-    //     type: String,
-    //     required: true
-    // },
     // subjects: {
     //     type: Array,
     //     required: true,
