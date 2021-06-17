@@ -1,4 +1,4 @@
 {
-    "mongoURI":"mongodb+srv://Salik:sR89MOEVl5gjn1r5@project-zero.ju6ts.mongodb.net/test",
-    "jwtSecret": "mysecrettoken"
+  "mongoURI": "mongodb+srv://Salik:sR89MOEVl5gjn1r5@project-zero.ju6ts.mongodb.net/test",
+  "jwtSecret": "mysecrettoken"
 }
