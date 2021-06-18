@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+
 const studentSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -20,10 +21,23 @@ const studentSchema = new mongoose.Schema({
     required: true,
     unique: 10,
   },
+  enquiryStatus: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
   enrollmentStatus: {
     type: Boolean,
     required: true,
     default: false,
+  },
+  enquiryDate: {
+    type: Date,
+    required: false,
+  },
+  enrollmentDate: {
+    type: Date,
+    required: false,
   },
   // subjects: {
   //     type: Array,
