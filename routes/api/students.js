@@ -151,7 +151,6 @@ router.post(
         student = new Student({
           name,
           phone,
-          enquiryStatus: false,
           enrollmentStatus: true,
           enrollmentDate: new Date(),
         });
@@ -164,7 +163,6 @@ router.post(
             name,
             email,
             phone,
-            enquiryStatus: false,
             enrollmentStatus: true,
             enrollmentDate: new Date(),
           });
