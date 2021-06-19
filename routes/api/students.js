@@ -60,6 +60,64 @@ router.post(
 );
 
 // @route  POST api/students
+// @desc   Create a student enquiry
+// @access Private
+
+router.post(
+  "/create-enquiry",
+  verifyToken,
+  [
+    check("name")
+      .not()
+      .isEmpty()
+      .withMessage("Name is required")
+      .isAlpha()
+      .withMessage("Name should contain only letters")
+      .isLength({ min: 2 })
+      .withMessage("Name should be atleast 2 letter long"),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const { name, email, phone } = req.body;
+
+    try {
+      let student = await Student.findOne({ phone });
+      if (student) {
+        res.status(400).json({ errors: [{ msg: "Student already exists" }] });
+      }
+
+      if (!req.body.email) {
+        student = new Student({
+          name,
+          phone,
+          enquiryStatus: true,
+          enquirymentDate: new Date(),
+        });
+      } else {
+        let studentEmail = await Student.findOne({ email });
+        if (studentEmail) {
+          res.status(400).send("Student already exists");
+        } else {
+          student = new Student({
+            name,
+            email,
+            phone,
+            enquiryStatus: true,
+            enquirymentDate: new Date(),
+          });
+        }
+      }
+      student.save();
+    } catch (err) {
+      res.status(500).send(err.message);
+    }
+  }
+);
+
+// @route  POST api/students
 // @desc   Create enrollment for a student
 // @access Private
 
