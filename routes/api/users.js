@@ -10,7 +10,7 @@ const config = require("config");
 // @access Public
 
 // chng to admin
-const User = require("../../Models/admin");
+const User = require("../../Models/user");
 
 router.post(
   "/",
