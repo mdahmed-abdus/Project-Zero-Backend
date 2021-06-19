@@ -267,4 +267,26 @@ router.delete("/delete-student/:phone", verifyToken, async (req, res) => {
   }
 });
 
+// @route  POST api/students
+// @desc   get number of all the students who have enquired
+// @access Private
+
+router.get("/number-of-enquiries", verifyToken, async (req, res) => {
+  try {
+    const numberOfEnquiries = await Student.count(
+      { enquiryStatus: true },
+      (err, numOfEnquiries) => {
+        if (err || numOfEnquiries === 0) {
+          return res.status(404).json({
+            message: "No enquiries",
+          });
+        }
+      }
+    );
+    res.status(200).send(`Number of enquiries: ${numberOfEnquiries}`);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
 module.exports = router;
