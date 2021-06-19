@@ -5,7 +5,7 @@ const { verifyToken } = require("../../middleware/auth");
 const brcypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const config = require("config");
-const User = require("../../Models/admin");
+const User = require("../../Models/user");
 
 // // @route  GET api/auth
 // // @desc   Test route
@@ -29,7 +29,6 @@ router.post(
   "/sign-in",
   [
     check("email", "Please recheck your email").isEmail(),
-    //.matches("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$"),,
     check("password", "Please recheck your password").isLength({ min: 8 }),
     //.matches('/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/'),
   ],
