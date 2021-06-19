@@ -35,12 +35,8 @@ router.post(
         student = new Student({
           name,
           phone,
-          enrollmentStatus,
           enquiryStatus,
-          enquiryStatus: false,
-          enrollmentStatus: true,
-          enrollmentDate: new Date(),
-          enquiryDate: new Date(),
+          enrollmentStatus,
         });
       } else {
         let studentEmail = await Student.findOne({ email });
@@ -51,8 +47,8 @@ router.post(
             name,
             email,
             phone,
-            enrollmentStatus,
             enquiryStatus,
+            enrollmentStatus,
           });
         }
       }
