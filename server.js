@@ -14,7 +14,7 @@ connectDB();
 app.get("/", (req, res) => res.send("API Running"));
 
 //Define Routes
-app.use("/api/sign-up", require("./routes/api/admin"));
+app.use("/api/sign-up", require("./routes/api/users"));
 app.use("/api/", require("./routes/api/auth"));
 app.use("api/sign-out", require("./routes/api/auth"));
 app.use("/api/admin/", require("./routes/api/students"));
