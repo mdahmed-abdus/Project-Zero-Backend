@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const moment = require("moment");
 const { verifyToken } = require("../../middleware/auth");
 const { check, validationResult } = require("express-validator");
 const Student = require("../../models/student");
@@ -38,20 +37,24 @@ router.post(
           phone,
           enrollmentStatus,
           enquiryStatus,
+          enquiryStatus: false,
+          enrollmentStatus: true,
+          enrollmentDate: new Date(),
+          enquiryDate: new Date(),
         });
       } else {
-        // create student by email
         let studentEmail = await Student.findOne({ email });
         if (studentEmail) {
           res.status(400).send("Student already exists");
+        } else {
+          student = new Student({
+            name,
+            email,
+            phone,
+            enrollmentStatus,
+            enquiryStatus,
+          });
         }
-        student = new Student({
-          name,
-          email,
-          phone,
-          enrollmentStatus,
-          enquiryStatus,
-        });
       }
       student.save();
     } catch (err) {
