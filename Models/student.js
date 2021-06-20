@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 
-
 const studentSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -16,7 +15,7 @@ const studentSchema = new mongoose.Schema({
     minlength: 8,
     maxlength: 128,
   },
-  phone: {
+  phoneNumber: {
     type: Number,
     required: true,
     unique: 10,
