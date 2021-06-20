@@ -289,4 +289,27 @@ router.get("/number-of-enquiries", verifyToken, async (req, res) => {
   }
 });
 
+// @route  POST api/students
+// @desc   get list of all the enrolled students
+// @access Private
+
+router.get("/list-all-enrolled-students", verifyToken, async (req, res) => {
+  try {
+    const enrollmentFilter = { enrollmentStatus: true };
+    const enrolledStudents = await Student.find(
+      enrollmentFilter,
+      (err, enrolledStudents) => {
+        if (!enrolledStudents) {
+          return res.status(404).json({
+            msg: "No enrolled students",
+          });
+        }
+      }
+    );
+    res.json(enrolledStudents);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
 module.exports = router;
