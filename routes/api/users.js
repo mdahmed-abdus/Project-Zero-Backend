@@ -4,39 +4,64 @@ const router = express.Router();
 const brcypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const config = require("config");
+const User = require("../../Models/user");
 
 // @route  POST api/users
 // @desc   Test route
 // @access Public
 
-// chng to admin
-const User = require("../../Models/user");
+// find regrex for username and password
 
 router.post(
   "/",
   [
-    check("name", "Please enter the name correctly").isAlpha(),
-    check("email", "Email is required").isEmail(),
-    //.matches("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$"),
-    check("password", "Please enter a valid password").isLength({ min: 8 }),
+    check("name")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter your name")
+      .isAlpha()
+      .withMessage("User's name should only consist of letters")
+      .isLength({ min: 2 })
+      .withMessage("User's name should atleast be 2 letter long"),
+    check("email")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter your email address")
+      .isEmail()
+      .withMessage("Please enter a valid email address"),
+    check("password")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter your password")
+      .isLength({ min: 8 })
+      .withMessage("Password must be atleast 8 character long"),
     //.matches('/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/'),
-    check("phoneNumber", "Please enter a valid phone number").isLength({
-      min: 10,
-      max: 10,
-    }),
+    check("phoneNumber")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter your phone number")
+      .isNumeric()
+      .isLength({ min: 10, max: 10 })
+      .withMessage("Please enter a valid phone number"),
   ],
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(406).send(errors.array({ onlyFirstError: true }));
     }
 
     const { name, email, password, phoneNumber } = req.body;
     try {
       //See if user exists
-      let user = await User.findOne({ email });
-      if (user) {
-        res.status(400).json({ errors: [{ msg: "User Already Exist" }] });
+      let userEmail = await User.findOne({ email });
+      let userPhoneNumber = await User.findOne({ phoneNumber });
+      if (userEmail) {
+        return res.status(502).send("The entered email is already registered");
+      }
+      if (userPhoneNumber) {
+        return res
+          .status(502)
+          .send("The entered phone number is already registered");
       }
 
       user = new User({
@@ -51,9 +76,6 @@ router.post(
       user.password = await brcypt.hash(password, salt);
       await user.save();
 
-      //Return jsonwebtokens
-      // res.send('User Register');
-
       const payload = {
         user: {
           id: user.id,
@@ -66,7 +88,7 @@ router.post(
         { expiresIn: 360000 },
         (err, token) => {
           if (err) throw err;
-          res.send("Registration Successful");
+          res.status(200).send("Registration Successful");
         }
       );
     } catch (err) {
