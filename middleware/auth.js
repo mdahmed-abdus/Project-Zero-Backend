@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const config = require("config");
 
 // change to arrow function
-const verifyToken = function (req, res, next) {
+const verifyToken = (req, res, next) => {
   // Get token from the header
   const token = req.header("x-auth-token");
   // Check if token is present

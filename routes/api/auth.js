@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { check, validationResult } = require("express-validator");
-const { verifyToken } = require("../../middleware/auth");
+// const { verifyToken } = require("../../middleware/auth");
 const brcypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const config = require("config");
@@ -43,13 +43,13 @@ router.post(
       //See if user exists
       let user = await User.findOne({ email });
       if (!user) {
-        return res.status(400).json({ errors: [{ msg: "User Not Found" }] });
+        return res.status(404).json({ errors: [{ msg: "User Not Found" }] });
       }
 
       const isMatch = await brcypt.compare(password, user.password);
 
       if (!isMatch) {
-        return res.status(400).json({ errors: [{ msg: "Invalid Password" }] });
+        return res.status(502).json({ errors: [{ msg: "Invalid Password" }] });
       }
 
       const payload = {
@@ -58,7 +58,7 @@ router.post(
         },
       };
 
-      const token = jwt.sign(
+      jwt.sign(
         payload,
         config.get("jwtSecret"),
         { expiresIn: 360000 },

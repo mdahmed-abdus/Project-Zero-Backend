@@ -10,17 +10,15 @@ const User = require("../../Models/user");
 // @desc   Test route
 // @access Public
 
-// find regrex for username and password
+// add regrex for username and password
 
 router.post(
-  "/",
+  "/sign-up",
   [
     check("name")
       .not()
       .isEmpty()
       .withMessage("Please enter your name")
-      .isAlpha()
-      .withMessage("User's name should only consist of letters")
       .isLength({ min: 2 })
       .withMessage("User's name should atleast be 2 letter long"),
     check("email")
