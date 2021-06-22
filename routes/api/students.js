@@ -161,7 +161,7 @@ router.post(
           name,
           phoneNumber,
           enquiryStatus: true,
-          enquirymentDate: new Date(),
+          enquiryDate: new Date(),
         });
       } else {
         let studentEmail = await Student.findOne({ email });
@@ -173,7 +173,7 @@ router.post(
             email,
             phoneNumber,
             enquiryStatus: true,
-            enquirymentDate: new Date(),
+            enquiryDate: new Date(),
           });
         }
       }
@@ -370,7 +370,7 @@ router.get("/list-all-enquiries", verifyToken, async (req, res) => {
 // @desc   get list of all the enrolled students
 // @access Private
 
-router.get("/list-all-enrollments", verifyToken, async (req, res) => {
+router.get("/list-all-enrollments", verifyToken, async (req, res, next) => {
   try {
     const enrollmentFilter = { enrollmentStatus: true };
     const enrolledStudents = await Student.find(
@@ -769,7 +769,7 @@ router.get(
 );
 
 // @route  GET api/students
-// @desc   get all the enrollments in last one year
+// @desc   get the number the enrollments in last one year
 // @access Private
 
 router.get(
