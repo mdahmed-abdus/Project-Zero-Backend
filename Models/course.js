@@ -1,7 +1,14 @@
 const mongoose = require("mongoose");
-// const { ObjectId } = mongoose.Schema;
+
 const courseSchema = new mongoose.Schema({
   name: {
+    type: String,
+    required: true,
+    trim: true,
+    minlength: 1,
+    maxlength: 128,
+  },
+  authorName: {
     type: String,
     required: true,
     trim: true,
@@ -13,43 +20,27 @@ const courseSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  authorName: {
-    type: String,
+  numberOfLectures: {
+    type: Number,
     required: true,
     trim: true,
-    minlength: 2,
-    maxlength: 128,
+  },
+  duration: {
+    type: Number,
+    required: true,
+    trim: true,
   },
   rating: {
     type: Number,
     required: true,
     trim: true,
-    minlength: 1,
-    maxlength: 2,
+    min: 0,
+    max: 10,
   },
-
-  /*
-  student: {
-    type: ObjectId,
-    ref: "Student",
-    required: true,
+  photo: {
+    data: Buffer,
+    contentType: String,
   },
-  status: {
-    type: Boolean,
-    required: true,
-    default: false,
-  },
-  offeredFees: {
-    type: Number,
-    required: true,
-    trim: true,
-  },
-  actualFees: {
-    type: Number,
-    required: false,
-    trim: true,
-  },
-  */
 });
 
 module.exports = Course = mongoose.model("course", courseSchema);
