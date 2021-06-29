@@ -23,9 +23,18 @@ const studentSchema = new mongoose.Schema({
   enquiryStatus: {
     type: Boolean,
     required: true,
+  },
+  isEnquiryActive: {
+    type: Boolean,
+    required: true,
     default: false,
   },
   enrollmentStatus: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
+  isEnrollmentActive: {
     type: Boolean,
     required: true,
     default: false,
@@ -38,11 +47,18 @@ const studentSchema = new mongoose.Schema({
     type: Date,
     required: false,
   },
-  // subjects: {
-  //     type: Array,
-  //     required: true,
-  //     default: []
-  // }
+  year: {
+    type: String,
+    required: true,
+  },
+  course: {
+    type: String,
+    required: true,
+  },
+  college: {
+    type: String,
+    required: true,
+  },
 });
 
 module.exports = Student = mongoose.model("student", studentSchema);
