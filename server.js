@@ -26,8 +26,6 @@ app.use("/api/admin/students", require("./routes/api/students"));
 app.use("/api/admin/courses", require("./routes/api/courses"));
 // app.use('/api/logout', require('./routes/api/logout'));
 
-// www.localhost:5000/api/admin/courses/delete-course/60d44f49d9119a4b98987b5e
-
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));

@@ -1,5 +1,5 @@
 {
-  "name": "arsh",
+  "name": "student-management-system",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
@@ -13,11 +13,15 @@
     "bcrypt": "^5.0.1",
     "bcryptjs": "^2.4.3",
     "config": "^3.3.6",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-validator": "^6.12.0",
-    "gravatar": "^1.8.1",
+    "formidable": "^1.2.2",
+    "fs": "0.0.1-security",
     "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.21",
     "mongoose": "^5.12.13",
+    "morgan": "^1.10.0",
     "request": "^2.88.2"
   },
   "devDependencies": {

@@ -5,6 +5,7 @@ const config = require("config");
 const verifyToken = (req, res, next) => {
   // Get token from the header
   const token = req.header("x-auth-token");
+
   // Check if token is present
   if (!token) {
     return res.status(401).json({

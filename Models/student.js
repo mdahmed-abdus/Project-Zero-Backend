@@ -25,6 +25,10 @@ const studentSchema = new mongoose.Schema({
     required: true,
     default: false,
   },
+  enquiryDate: {
+    type: Date,
+    required: false,
+  },
   isEnquiryActive: {
     type: Boolean,
     required: true,
@@ -39,10 +43,6 @@ const studentSchema = new mongoose.Schema({
     type: Boolean,
     required: true,
     default: false,
-  },
-  enquiryDate: {
-    type: Date,
-    required: false,
   },
   enrollmentDate: {
     type: Date,
@@ -59,6 +59,16 @@ const studentSchema = new mongoose.Schema({
   college: {
     type: String,
     required: true,
+  },
+  offeredFees: {
+    type: Number,
+    required: false,
+    trim: true,
+  },
+  actualFees: {
+    type: Number,
+    required: false,
+    trim: true,
   },
 });
 

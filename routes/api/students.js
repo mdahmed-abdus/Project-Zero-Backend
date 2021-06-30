@@ -1,12 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const { verifyToken } = require("../../middleware/auth");
-const { check, validationResult, body } = require("express-validator"); // Change to Joi
+const { check, validationResult, body } = require("express-validator"); 
 const Student = require("../../Models/student");
 
-// add validation to email
-// add regex to name and password
-// create a folder for validation
 
 // @route  POST api/admin/students
 // @desc   Create a student
@@ -31,9 +28,6 @@ router.post(
     check("year").not().isEmpty().withMessage("Year should not be empty"),
     check("course").not().isEmpty().withMessage("Course should not be empty"),
     check("college").not().isEmpty().withMessage("College should not be empty"),
-    check("enquiryStatus")
-      .isBoolean()
-      .withMessage("Enquiry Status should be a boolean value"),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -51,6 +45,8 @@ router.post(
       year,
       course,
       college,
+      offeredFees,
+      actualFees,
     } = req.body;
     console.log(req.body);
     try {
@@ -72,6 +68,8 @@ router.post(
             year,
             course,
             college,
+            offeredFees,
+            actualFees,
           });
         }
         if (req.body.enrollmentStatus) {
@@ -84,6 +82,8 @@ router.post(
             year,
             course,
             college,
+            offeredFees,
+            actualFees,
           });
         }
 
@@ -100,6 +100,8 @@ router.post(
             year,
             course,
             college,
+            offeredFees,
+            actualFees,
           });
         } else {
           student = new Student({ name, phoneNumber, year, course, college });
@@ -123,6 +125,8 @@ router.post(
             year,
             course,
             college,
+            offeredFees,
+            actualFees,
           });
         }
         if (req.body.enrollmentStatus) {
@@ -136,6 +140,8 @@ router.post(
             year,
             course,
             college,
+            offeredFees,
+            actualFees,
           });
         }
 
@@ -153,6 +159,8 @@ router.post(
             year,
             course,
             college,
+            offeredFees,
+            actualFees,
           });
         } else {
           student = new Student({
@@ -162,6 +170,8 @@ router.post(
             year,
             course,
             college,
+            offeredFees,
+            actualFees,
           });
         }
       }
@@ -193,6 +203,12 @@ router.post(
       .withMessage("Please enter student's phone number")
       .isNumeric({ min: 10, max: 10 })
       .withMessage("Please enter a valid phone number"),
+    check("offeredFees")
+      .not()
+      .isEmpty()
+      .withMessage("Enter the offered fees")
+      .isNumeric()
+      .withMessage("Fees should be in number"),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -201,7 +217,8 @@ router.post(
         .status(400)
         .json({ errors: errors.array({ onlyFirstError: true }) });
     }
-    const { name, email, phoneNumber, year, course, college } = req.body;
+    const { name, email, phoneNumber, year, course, college, offeredFees } =
+      req.body;
 
     try {
       let student = await Student.findOne({ phoneNumber });
@@ -221,6 +238,7 @@ router.post(
           year,
           course,
           college,
+          offeredFees,
         });
       } else {
         body("email").isEmail().withMessage("Please enter a valid email");
@@ -238,6 +256,7 @@ router.post(
             year,
             course,
             college,
+            offeredFees,
           });
         }
       }
@@ -269,6 +288,18 @@ router.post(
       .withMessage("Please enter student's phone number")
       .isNumeric({ min: 10, max: 10 })
       .withMessage("Please enter a valid phone number"),
+    check("offeredFees")
+      .not()
+      .isEmpty()
+      .withMessage("Enter the offered fees")
+      .isNumeric()
+      .withMessage("Fees should be in number"),
+    check("actualFees")
+      .not()
+      .isEmpty()
+      .withMessage("Enter the actual fees")
+      .isNumeric()
+      .withMessage("Fees should be in number"),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -293,6 +324,8 @@ router.post(
           year,
           course,
           college,
+          offeredFees,
+          actualFees,
         });
       } else {
         body("email").isEmail().withMessage("Please enter a valid email");
@@ -310,6 +343,8 @@ router.post(
             year,
             course,
             college,
+            offeredFees,
+            actualFees,
           });
         }
       }
