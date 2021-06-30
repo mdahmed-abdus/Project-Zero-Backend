@@ -1,50 +1,51 @@
 const express = require("express");
+const fs = require("fs");
+const _ = require("lodash");
+const formidable = require("formidable");
 const router = express.Router();
 const { verifyToken } = require("../../middleware/auth");
-const { check, validationResult } = require("express-validator");
+// const { check, validationResult } = require("express-validator");
 const Course = require("../../Models/course");
 
 // @route POST api/admin/courses
 // @desc Create a course description
 // @access Private
 
-router.post(
-  "/create-course",
-  verifyToken,
-  [
-    check("name")
-      .not()
-      .isEmpty()
-      .withMessage("Please enter the name of course")
-      .isLength({ min: 2 })
-      .withMessage("Course name should be atleast 2 letter long"),
-    check("fees")
-      .not()
-      .isEmpty()
-      .withMessage("Please enter the fees of course"),
-    check("authorName")
-      .not()
-      .isEmpty()
-      .withMessage("Please enter the name of author")
-      .isLength({ min: 2 })
-      .withMessage("Please enter a valid name"),
-    check("rating")
-      .not()
-      .isEmpty()
-      .withMessage("Please enter the course rating")
-      .isNumeric({ min: 1, max: 10 })
-      .withMessage(
-        "Please enter a valid rating, course rating should be between 1 and 10"
-      ),
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res
-        .status(406)
-        .json({ errors: errors.array({ onlyFirstError: true }) });
+router.post("/create-course", verifyToken, async (req, res, next) => {
+  // Basic Setup
+  let form = new formidable.IncomingForm();
+  form.keepExtensions = true;
+
+  // Basic Configuration
+  // form.maxFileSize = 50 * 1024 * 1024; // 1 MB
+
+  // Form Parsing
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      console.log("Error parsing the files");
+      return res.status(400).json({
+        status: "Fail",
+        message: "There was an error parsing the files",
+        error: err,
+      });
     }
-    const { name, fees, authorName, rating } = req.body;
+
+    const { name, authorName, fees, numberOfLectures, duration, rating } =
+      fields;
+
+    if (
+      !name ||
+      !authorName ||
+      !fees ||
+      !numberOfLectures ||
+      !duration ||
+      !rating
+    ) {
+      return res.status(400).json({
+        err: "All fields are required - name, authorName, fees, numberOfLectures, duration, rating",
+      });
+    }
+
     try {
       let courseName = await Course.findOne({ name });
       if (courseName) {
@@ -52,14 +53,26 @@ router.post(
           .status(400)
           .json({ message: "Entered course already exists" });
       }
-      course = new Course({ name, fees, authorName, rating });
-      course.save();
-      return res.status(200).json({ message: "Course entry created" });
+      let course = new Course(fields);
+
+      if (files.photo) {
+        // console.log("PHOTO", files.photo);
+        if (files.photo.size > 10 * 1024 * 1024) {
+          return res.status(400).json({
+            error: "Image size should be less then 1 MB",
+          });
+        }
+
+        course.photo.data = fs.readFileSync(files.photo.path);
+        course.photo.contentType = files.photo.type;
+      }
+      await course.save();
+      return res.status(200).json({ course });
     } catch (err) {
-      return res.status(500).send(err.message);
+      return res.status(500).json({ err: "Server error" });
     }
-  }
-);
+  });
+});
 
 // @route GET api/admin/courses
 // @desc list all the courses
@@ -84,7 +97,8 @@ router.get("/list-courses", verifyToken, async (req, res) => {
 
 router.put("/update-course/:id", verifyToken, async (req, res) => {
   try {
-    const { name, fees, authorName, rating } = req.body;
+    const { name, authorName, fees, numberOfLectures, duration, rating } =
+      req.body;
     const course = await Course.findOne({ _id: req.params.id });
 
     if (!course) {
@@ -92,8 +106,10 @@ router.put("/update-course/:id", verifyToken, async (req, res) => {
     }
 
     if (name) course.name = name;
-    if (fees) course.fees = fees;
     if (authorName) course.authorName = authorName;
+    if (fees) course.fees = fees;
+    if (numberOfLectures) course.numberOfLectures = numberOfLectures;
+    if (duration) course.duration = duration;
     if (rating) course.rating = rating;
 
     await course.save();
@@ -119,19 +135,5 @@ router.delete("/delete-course/:id", verifyToken, async (req, res) => {
     return res.status(500).send(err.message);
   }
 });
-
-// router.delete("/delete-course/:id ", verifyToken, async (req, res) => {
-//   try {
-//     await Student.findOneAndDelete({ id: req.params._id }, (err, result) => {
-//       if (result !== null) {
-//         return res.status(200).json({ result });
-//       } else {
-//         return res.status(400).json(err);
-//       }
-//     });
-//   } catch (err) {
-//     return res.status(500).send(err.message);
-//   }
-// });
 
 module.exports = router;
