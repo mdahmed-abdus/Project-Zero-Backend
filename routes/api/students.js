@@ -1,14 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const { verifyToken } = require("../../middleware/auth");
-const { check, validationResult } = require("express-validator");
-const Student = require("../../models/student");
+const { check, validationResult, body } = require("express-validator"); // Change to Joi
+const Student = require("../../Models/student");
 
-// add regex to name and password
 // add validation to email
+// add regex to name and password
 // create a folder for validation
 
-// @route  POST api/students
+// @route  POST api/admin/students
 // @desc   Create a student
 // @access Private
 
@@ -28,6 +28,12 @@ router.post(
       .withMessage("Please enter student's phone number")
       .isNumeric({ min: 10, max: 10 })
       .withMessage("Please enter a valid phone number"),
+    check("year").not().isEmpty().withMessage("Year should not be empty"),
+    check("course").not().isEmpty().withMessage("Course should not be empty"),
+    check("college").not().isEmpty().withMessage("College should not be empty"),
+    check("enquiryStatus")
+      .isBoolean()
+      .withMessage("Enquiry Status should be a boolean value"),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -36,91 +42,138 @@ router.post(
         .status(406)
         .json({ errors: errors.array({ onlyFirstError: true }) });
     }
-    const { name, email, phoneNumber, enquiryStatus, enrollmentStatus } =
-      req.body;
+    const {
+      name,
+      email,
+      phoneNumber,
+      enquiryStatus,
+      enrollmentStatus,
+      year,
+      course,
+      college,
+    } = req.body;
+    console.log(req.body);
     try {
       let studentPhone = await Student.findOne({ phoneNumber });
       if (studentPhone) {
-        return res.status(400).send("Student already exists");
+        return res
+          .status(400)
+          .json({ error: { message: "Student already exists" } });
       }
 
       if (!req.body.email) {
-        if (enquiryStatus) {
+        if (req.body.enquiryStatus) {
           student = new Student({
             name,
             phoneNumber,
-            enquiryStatus,
+            enquiryStatus: req.body.enquiryStatus,
+            isEnquiryActive: true,
             enquiryDate: new Date(),
+            year,
+            course,
+            college,
           });
         }
-        if (enrollmentStatus) {
+        if (req.body.enrollmentStatus) {
           student = new Student({
             name,
             phoneNumber,
             enrollmentStatus,
+            isEnrollmentActive: true,
             enrollmentDate: new Date(),
+            year,
+            course,
+            college,
           });
         }
 
-        if (enquiryStatus && enrollmentStatus) {
+        if (req.body.enquiryStatus && req.body.enrollmentStatus) {
           student = new Student({
             name,
             phoneNumber,
             enquiryStatus,
+            isEnquiryActive: true,
             enrollmentStatus,
+            isEnrollmentActive: true,
             enquiryDate: new Date(),
             enrollmentDate: new Date(),
+            year,
+            course,
+            college,
           });
         } else {
-          student = new Student({ name, phoneNumber });
+          student = new Student({ name, phoneNumber, year, course, college });
         }
       } else {
+        req.body("email").isEmail().withMessage("Please enter a valid email");
         let studentEmail = await Student.findOne({ email });
         if (studentEmail) {
-          return res.status(400).send("Student already exists");
+          return res
+            .status(400)
+            .json({ error: { message: "Student already exists" } });
         }
-        if (enquiryStatus) {
+        if (req.body.enquiryStatus == true) {
           student = new Student({
             name,
             email,
             phoneNumber,
             enquiryStatus,
+            isEnquiryActive: true,
             enquiryDate: new Date(),
+            year,
+            course,
+            college,
           });
         }
-        if (enrollmentStatus) {
+        if (req.body.enrollmentStatus) {
           student = new Student({
             name,
             email,
             phoneNumber,
             enrollmentStatus,
+            isEnrollmentActive: true,
             enrollmentDate: new Date(),
+            year,
+            course,
+            college,
           });
         }
 
-        if (enquiryStatus && enrollmentStatus) {
+        if (req.body.enquiryStatus && req.body.enrollmentStatus) {
           student = new Student({
             name,
             email,
             phoneNumber,
             enquiryStatus,
+            isEnquiryActive: true,
             enrollmentStatus,
+            isEnrollmentActive: true,
             enquiryDate: new Date(),
             enrollmentDate: new Date(),
+            year,
+            course,
+            college,
           });
         } else {
-          student = new Student({ name, email, phoneNumber });
+          student = new Student({
+            name,
+            email,
+            phoneNumber,
+            year,
+            course,
+            college,
+          });
         }
       }
-      student.save();
-      return res.status(200).send("Student registered successfully");
+      await student.save();
+      return res.status(200).json(student);
     } catch (err) {
-      return res.status(500).send(err.message);
+      return res.status(500).json(err.message);
     }
   }
 );
 
-// @route  POST api/students
+// @route  POST api/admin/students
 // @desc   Create a student enquiry
 // @access Private
 
@@ -148,12 +201,14 @@ router.post(
         .status(400)
         .json({ errors: errors.array({ onlyFirstError: true }) });
     }
-    const { name, email, phoneNumber } = req.body;
+    const { name, email, phoneNumber, year, course, college } = req.body;
 
     try {
       let student = await Student.findOne({ phoneNumber });
       if (student) {
-        res.status(400).json({ errors: [{ msg: "Student already exists" }] });
+        return res
+          .status(400)
+          .json({ error: { msg: "Student already exists" } });
       }
 
       if (!req.body.email) {
@@ -161,31 +216,40 @@ router.post(
           name,
           phoneNumber,
           enquiryStatus: true,
+          isEnquiryActive: true,
           enquiryDate: new Date(),
+          year,
+          course,
+          college,
         });
       } else {
+        body("email").isEmail().withMessage("Please enter a valid email");
         let studentEmail = await Student.findOne({ email });
         if (studentEmail) {
-          res.status(400).send("Student already exists");
+          return res.status(400).send("Student already exists");
         } else {
           student = new Student({
             name,
             email,
             phoneNumber,
             enquiryStatus: true,
+            isEnquiryActive: true,
             enquiryDate: new Date(),
+            year,
+            course,
+            college,
           });
         }
       }
-      student.save();
-      return res.status(200).send("Student enquiry created successfully");
+      await student.save();
+      return res.status(200).json(student);
     } catch (err) {
-      return res.status(500).send(err.message);
+      return res.status(500).json(err.message);
     }
   }
 );
 
-// @route  POST api/students
+// @route  POST api/admin/students
 // @desc   Create enrollment for a student
 // @access Private
 
@@ -211,12 +275,12 @@ router.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const { name, email, phoneNumber } = req.body;
+    const { name, email, phoneNumber, year, course, college } = req.body;
 
     try {
       let student = await Student.findOne({ phoneNumber });
       if (student) {
-        res.status(400).json({ errors: [{ msg: "Student already exists" }] });
+        res.status(400).json({ error: { msg: "Something went wrong" } });
       }
 
       if (!req.body.email) {
@@ -224,31 +288,60 @@ router.post(
           name,
           phoneNumber,
           enrollmentStatus: true,
+          isEnrollmentActive: true,
           enrollmentDate: new Date(),
+          year,
+          course,
+          college,
         });
       } else {
+        body("email").isEmail().withMessage("Please enter a valid email");
         let studentEmail = await Student.findOne({ email });
         if (studentEmail) {
-          res.status(400).send("Student already exists");
+          res.status(400).json({ error: { msg: "Student already exists" } });
         } else {
           student = new Student({
             name,
             email,
             phoneNumber,
             enrollmentStatus: true,
+            isEnrollmentActive: true,
             enrollmentDate: new Date(),
+            year,
+            course,
+            college,
           });
         }
       }
-      student.save();
-      return res.status(200).send("Student enrollment created successfully");
+      await student.save();
+      return res.status(200).json(student);
     } catch (err) {
-      return res.status(500).send(err.message);
+      return res.status(500).json(err.message);
     }
   }
 );
 
-// @route  GET api/students
+// @route PUT api/admin/students
+// @desc convert a student enquiry to enrollment
+// @access Private
+
+router.put("/enquiry-to-enrollment/:id", verifyToken, async (req, res) => {
+  try {
+    const student = await Student.findOne({ _id: req.params.id });
+    student.enquiryStatus = false;
+    student.isEnquiryActive = false;
+    student.enrollmentStatus = true;
+    student.isEnrollmentActive = true;
+
+    await student.save();
+
+    return res.status(200).json(student);
+  } catch (err) {
+    return res.status(500).json(err.message);
+  }
+});
+
+// @route  GET api/admin/students
 // @desc   Find a student by phone number
 // @access Private
 
@@ -259,16 +352,16 @@ router.get("/find-student/:phoneNumber", verifyToken, async (req, res) => {
     });
 
     if (!student) {
-      return res.status(404).json({ msg: "Student not found" });
+      return res.status(404).json({ error: { msg: "Student already exists" } });
     }
 
     return res.status(200).json(student);
   } catch (err) {
-    return res.status(500).send(err.message);
+    return res.status(500).json(err.message);
   }
 });
 
-// @route  PUT api/students
+// @route  PUT api/admin/students
 // @desc   update the details of a student
 // @access Private
 
@@ -279,9 +372,14 @@ router.put("/update-student/:phoneNumber", verifyToken, async (req, res) => {
       email,
       phoneNumber,
       enquiryStatus,
-      enrollmentStatus,
+      isEnquiryActive,
       enquiryDate,
+      enrollmentStatus,
+      isEnrollmentActive,
       enrollmentDate,
+      year,
+      course,
+      college,
     } = req.body;
     const student = await Student.findOne({
       phoneNumber: req.params.phoneNumber,
@@ -293,19 +391,35 @@ router.put("/update-student/:phoneNumber", verifyToken, async (req, res) => {
 
     if (name) student.name = name;
     if (email) student.email = email;
-    if (phone) student.phoneNumber = phoneNumber;
-    if (enquiryStatus) student.enquiryStatus = enquiryStatus;
-    if (enrollmentStatus) student.enrollmentStatus = enrollmentStatus;
+    if (phoneNumber) student.phoneNumber = phoneNumber;
+    if (enquiryStatus) {
+      student.enquiryStatus = enquiryStatus;
+      if (enquiryStatus === true) {
+        student.isEnquiryActive = true;
+      }
+    }
+    if (enrollmentStatus) {
+      student.enrollmentStatus = enrollmentStatus;
+      if (enrollmentStatus === true) {
+        student.isEnrollmentActive = true;
+      }
+    }
+    if (isEnquiryActive) student.isEnquiryActive = isEnquiryActive;
+    if (isEnrollmentActive) student.isEnrollmentActive = isEnrollmentActive;
     if (enquiryDate) student.enquiryDate = enquiryDate;
     if (enrollmentDate) student.enrollmentDate = enrollmentDate;
+    if (year) student.year = year;
+    if (course) student.course = course;
+    if (college) student.college = college;
 
-    return res.json({ msg: `Student data got updated` });
+    await student.save();
+    return res.json(student);
   } catch (err) {
-    return res.status(500).send(err.message);
+    return res.status(500).json(err.message);
   }
 });
 
-// @route  DELELTE api/students
+// @route  DELELTE api/admin/students
 // @desc   delete a student entry
 // @access Private
 
@@ -313,83 +427,85 @@ router.delete("/delete-student/:phoneNumber", verifyToken, async (req, res) => {
   try {
     await Student.findOneAndDelete(
       { phoneNumber: req.params.phoneNumber },
-      (err, result) => {
-        if (result != null) {
-          return res.status(200).json({ result });
+      (err, deletedStudent) => {
+        if (null !== deletedStudent) {
+          return res.status(200).json(deletedStudent);
         } else {
-          return res.status(400).send("Student could not be deleted");
+          return res
+            .status(400)
+            .json({ error: { message: "Something went wrong" } });
         }
       }
     );
   } catch (err) {
-    return res.status(500).send(err.message);
+    return res.status(500).json(err.message);
   }
 });
 
-// @route  GET api/students
+// @route  GET api/admin/students
 // @desc   get list of all the students
 // @access Private
 
 router.get("/list-students", verifyToken, async (req, res) => {
   try {
-    const students = await Student.find((err, students) => {
-      if (!students) {
-        return res.status(404).json({ msg: "No data available" });
+    const listOfStudents = await Student.find((err, students) => {
+      if (!students || err) {
+        return res.status(404).json({ msg: "Something went wrong" });
       }
     });
-    return res.status(200).json(students);
+    return res.status(200).json(listOfStudents);
   } catch (err) {
-    return res.status(500).send(err.message);
+    return res.status(500).json(err.message);
   }
 });
 
-// @route  GET api/students
+// @route  GET api/admin/students
 // @desc   get list of all the students enquiries
 // @access Private
 
 router.get("/list-all-enquiries", verifyToken, async (req, res) => {
   try {
-    const enrollmentFilter = { enquiryStatus: true };
-    const enrolledStudents = await Student.find(
-      enrollmentFilter,
-      (err, enrolledStudents) => {
-        if (!enrolledStudents) {
+    const enquiryFilter = { enquiryStatus: true };
+    const listOfEnquiries = await Student.find(
+      enquiryFilter,
+      (err, listOfEnquiries) => {
+        if (!listOfEnquiries) {
           return res.status(404).json({
             msg: "No enrolled students",
           });
         }
       }
     );
-    return res.status(200).json(enrolledStudents);
+    return res.status(200).json(listOfEnquiries);
   } catch (err) {
-    return res.status(500).send(err.message);
+    return res.status(500).json(err.message);
   }
 });
 
-// @route  GET api/students
+// @route  GET api/admin/students
 // @desc   get list of all the enrolled students
 // @access Private
 
 router.get("/list-all-enrollments", verifyToken, async (req, res, next) => {
   try {
     const enrollmentFilter = { enrollmentStatus: true };
-    const enrolledStudents = await Student.find(
+    const listOfEnrollments = await Student.find(
       enrollmentFilter,
-      (err, enrolledStudents) => {
-        if (!enrolledStudents) {
+      (err, listOfEnrollments) => {
+        if (!listOfEnrollments) {
           return res.status(404).json({
             msg: "No enrolled students",
           });
         }
       }
     );
-    return res.json.status(200)(enrolledStudents);
+    return res.json.status(200)(listOfEnrollments);
   } catch (err) {
-    return res.status(500).send(err.message);
+    return res.status(500).json(err.message);
   }
 });
 
-// @route  GET api/students
+// @route  GET api/admin/students
 // @desc   get all the enquires of last 30 days
 // @access Private
 
@@ -409,24 +525,24 @@ router.get(
         enquiryStatus: true,
       };
 
-      const numberOfEnquiriesInThirtyDays = await Student.find(
+      const listOfEnquiriesInThirtyDays = await Student.find(
         fetchQuery,
-        (err, numOfEnquiriesInThirtyDays) => {
-          if (err || numOfEnquiriesInThirtyDays === 0) {
+        (err, listOfEnquiriesInThirtyDays) => {
+          if (err || listOfEnquiriesInThirtyDays === 0) {
             return res.status(404).json({
               message: "No enquiries in last 30 days",
             });
           }
         }
       );
-      res.status(200).json(numberOfEnquiriesInThirtyDays);
+      res.status(200).json(listOfEnquiriesInThirtyDays);
     } catch (err) {
       res.status(500).send(err.message);
     }
   }
 );
 
-// @route  GET api/students
+// @route  GET api/admin/students
 // @desc   get all the enquires of last 90 days
 // @access Private
 
@@ -463,7 +579,7 @@ router.get(
   }
 );
 
-// @route  GET api/students
+// @route  GET api/admin/students
 // @desc   get all the enquires in last year
 // @access Private
 
@@ -493,33 +609,28 @@ router.get(
       );
       res.status(200).json(listOfEnquiriesInLastYear);
     } catch (err) {
-      res.status(500).send(err.message);
+      res.status(500).json(err.message);
     }
   }
 );
 
-// @route  GET api/students
+// @route  GET api/admin/students
 // @desc   get number of all the students
 // @access Private
 
 router.get("/number-of-students", verifyToken, async (req, res) => {
   try {
-    const numberOfStudents = await Student.countDocuments(
-      (err, numOfStudents) => {
-        if (err || numOfStudents === 0) {
-          return res.status(404).json({
-            message: "No students",
-          });
-        }
+    await Student.countDocuments((err, numOfStudents) => {
+      if (!err || numOfStudents !== 0) {
+        return res.status(200).json(numberOfStudents);
       }
-    );
-    return res.status(200).send(`Number of students: ${numberOfStudents}`);
+    });
   } catch (err) {
-    return res.status(500).send(err.message);
+    return res.status(500).json(err.message);
   }
 });
 
-// @route  GET api/students
+// @route  GET api/admin/students
 // @desc   get number of all the enquiries
 // @access Private
 
@@ -528,44 +639,36 @@ router.get("/number-of-enquiries", verifyToken, async (req, res) => {
     const numberOfEnquiries = await Student.countDocuments(
       { enquiryStatus: true },
       (err, numOfEnquiries) => {
-        if (err || numOfEnquiries === 0) {
-          return res.status(404).json({
-            message: "No enquiries",
-          });
+        if (!err || numOfEnquiries !== 0) {
+          return res.status(200).json(numberOfEnquiries);
         }
       }
     );
-    return res.status(200).send(`Number of enquiries: ${numberOfEnquiries}`);
   } catch (err) {
-    return res.status(500).send(err.message);
+    return res.status(500).json(err.message);
   }
 });
 
-// @route  GET api/students
+// @route  GET api/admin/students
 // @desc   get number of all the enrollments
 // @access Private
 
 router.get("/number-of-enrollments", verifyToken, async (req, res) => {
   try {
-    const numberOfEnrollments = await Student.countDocuments(
+    await Student.countDocuments(
       { enrollmentStatus: true },
-      (err, numOfEnrollments) => {
-        if (err || numOfEnrollments === 0) {
-          return res.status(404).json({
-            message: "No enrollments",
-          });
+      (err, numberOfEnrollments) => {
+        if (!err || numberOfEnrollments !== 0) {
+          return res.status(200).json(numberOfEnrollments);
         }
       }
     );
-    return res
-      .status(200)
-      .send(`Number of enrollments: ${numberOfEnrollments}`);
   } catch (err) {
-    return res.status(500).send(err.message);
+    return res.status(500).json(err.message);
   }
 });
 
-// @route  GET api/students
+// @route  GET api/admin/students
 // @desc   get all the enquires of last 30 days
 // @access Private
 
@@ -585,28 +688,21 @@ router.get(
         enquiryStatus: true,
       };
 
-      const numberOfEnquiriesInThirtyDays = await Student.countDocuments(
+      await Student.countDocuments(
         fetchQuery,
-        (err, numOfEnquiriesInThirtyDays) => {
-          if (err || numOfEnquiriesInThirtyDays === 0) {
-            return res.status(404).json({
-              message: "No enquiries in last 30",
-            });
+        (err, numberOfEnquiriesInThirtyDays) => {
+          if (!err || numberOfEnquiriesInThirtyDays !== 0) {
+            res.status(200).json(numberOfEnquiriesInThirtyDays);
           }
         }
       );
-      res
-        .status(200)
-        .send(
-          `Number of enquiries in last 30 days: ${numberOfEnquiriesInThirtyDays}`
-        );
     } catch (err) {
-      res.status(500).send(err.message);
+      res.status(500).json(err.message);
     }
   }
 );
 
-// @route  GET api/students
+// @route  GET api/admin/students
 // @desc   get all the enquires of last 90 days
 // @access Private
 
@@ -626,23 +722,16 @@ router.get(
         enquiryStatus: true,
       };
 
-      const numberOfEnquiriesInNinetyDays = await Student.countDocuments(
+      await Student.countDocuments(
         fetchQuery,
-        (err, numOfEnquiriesInNinetyDays) => {
-          if (err || numOfEnquiriesInNinetyDays === 0) {
-            return res.status(404).json({
-              message: "No enquiries in last 90",
-            });
+        (err, numberOfEnquiriesInNinetyDays) => {
+          if (err || numberOfEnquiriesInNinetyDays === 0) {
+            res.status(200).json(numberOfEnquiriesInNinetyDays);
           }
         }
       );
-      res
-        .status(200)
-        .send(
-          `Number of enquiries in last 90 days: ${numberOfEnquiriesInNinetyDays}`
-        );
     } catch (err) {
-      res.status(500).send(err.message);
+      res.status(500).json(err.message);
     }
   }
 );
@@ -662,31 +751,29 @@ router.get(
 
       fetchQuery = {
         enquiryDate: { $gte: oneYearBefore, $lte: currentDate },
+        enquiryStatus: true,
       };
 
       const numberOfEnquiriesInLastYear = await Student.countDocuments(
         fetchQuery,
-        { enquiryStatus: true },
         (err, numOfEnquiriesInLastYear) => {
-          if (err || numOfEnquiriesInLastYear === 0) {
-            return res.status(404).json({
-              message: "No enquiries in last year",
-            });
+          if (!err || numOfEnquiriesInLastYear === 0) {
+            return res.status(400).json(err);
           }
         }
       );
       res
         .status(200)
-        .send(
+        .json(
           `Number of enquiries in last year: ${numberOfEnquiriesInLastYear}`
         );
     } catch (err) {
-      res.status(500).send(err.message);
+      res.status(500).json(err.message);
     }
   }
 );
 
-// @route  GET api/students
+// @route  GET api/admin/students
 // @desc   get all the enrollments in last 30 days
 // @access Private
 
@@ -709,7 +796,10 @@ router.get(
       const numberOfEnrollmentsInThirtyDays = await Student.countDocuments(
         fetchQuery,
         (err, numOfEnrollmentsInThirtyDays) => {
-          if (err || numOfEnrollmentsInThirtyDays === 0) {
+          if (err) {
+            return res.status(400).json(err);
+          }
+          if (numOfEnrollmentsInThirtyDays === 0) {
             return res.status(404).json({
               message: "No enrollments in last 30 days",
             });
@@ -718,16 +808,16 @@ router.get(
       );
       res
         .status(200)
-        .send(
+        .json(
           `Number of enrollments in last 30 days: ${numberOfEnrollmentsInThirtyDays}`
         );
     } catch (err) {
-      res.status(500).send(err.message);
+      res.status(500).json(err.message);
     }
   }
 );
 
-// @route  GET api/students
+// @route  GET api/admin/students
 // @desc   get all the enrollments in last 90 days
 // @access Private
 
@@ -750,25 +840,24 @@ router.get(
       const numberOfEnrollmentsInNinetyDays = await Student.countDocuments(
         fetchQuery,
         (err, numOfEnrollmentsInNinetyDays) => {
-          if (err || numOfEnrollmentsInNinetyDays === 0) {
+          if (err) {
+            return res.status(400).json(err);
+          }
+          if (numOfEnrollmentsInNinetyDays === 0) {
             return res.status(404).json({
               message: "No enrollments in last 30 days",
             });
           }
         }
       );
-      res
-        .status(200)
-        .send(
-          `Number of enrollments in last 90 days: ${numberOfEnrollmentsInNinetyDays}`
-        );
+      res.status(200).json(numberOfEnrollmentsInNinetyDays);
     } catch (err) {
-      res.status(500).send(err.message);
+      res.status(500).json(err.message);
     }
   }
 );
 
-// @route  GET api/students
+// @route  GET api/admin/students
 // @desc   get the number the enrollments in last one year
 // @access Private
 
@@ -782,27 +871,26 @@ router.get(
       oneYearBefore = oneYearBefore.setDate(oneYearBefore.getDate() - 365);
 
       fetchQuery = {
-        enquiryDate: { $gte: ninetyDaysBefore, $lte: currentDate },
+        enquiryDate: { $gte: oneYearBefore, $lte: currentDate },
+        enrollmentStatus: true,
       };
 
       const numberOfEnrollmentsInLastYear = await Student.countDocuments(
         fetchQuery,
-        { enrollmentStatus: true },
-        (err, numOfEnrollmentsInNinetyDays) => {
-          if (err || numOfEnrollmentsInNinetyDays === 0) {
+        (err, numOfEnrollmentsInLastYear) => {
+          if (err) {
+            return res.status(400).json(err);
+          }
+          if (numOfEnrollmentsInLastYear === 0) {
             return res.status(404).json({
               message: "No enrollments in last 30 days",
             });
           }
         }
       );
-      res
-        .status(200)
-        .send(
-          `Number of enrollments in last 90 days: ${numberOfEnrollmentsInLastYear}`
-        );
+      res.status(200).json(numberOfEnrollmentsInLastYear);
     } catch (err) {
-      res.status(500).send(err.message);
+      res.status(500).json(err.message);
     }
   }
 );

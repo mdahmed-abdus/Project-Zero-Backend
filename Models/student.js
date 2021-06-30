@@ -23,6 +23,7 @@ const studentSchema = new mongoose.Schema({
   enquiryStatus: {
     type: Boolean,
     required: true,
+    default: false,
   },
   isEnquiryActive: {
     type: Boolean,
