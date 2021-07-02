@@ -1,11 +1,11 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const { check, validationResult } = require("express-validator");
+const { check, validationResult } = require('express-validator');
 // const { verifyToken } = require("../../middleware/auth");
-const brcypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const config = require("config");
-const User = require("../../Models/user");
+const brcypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const config = require('config');
+const User = require('../../Models/user');
 
 // // @route  GET api/auth
 // // @desc   Test route
@@ -26,10 +26,10 @@ const User = require("../../Models/user");
 // @access Public
 
 router.post(
-  "/sign-in",
+  '/sign-in',
   [
-    check("email", "Please recheck your email").isEmail(),
-    check("password", "Please recheck your password").isLength({ min: 8 }),
+    check('email', 'Please recheck your email').isEmail(),
+    check('password', 'Please recheck your password').isLength({ min: 8 }),
     //.matches('/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/'),
   ],
   async (req, res) => {
@@ -43,13 +43,13 @@ router.post(
       //See if user exists
       let user = await User.findOne({ email });
       if (!user) {
-        return res.status(404).json({ errors: [{ msg: "User Not Found" }] });
+        return res.status(404).json({ errors: [{ msg: 'User Not Found' }] });
       }
 
       const isMatch = await brcypt.compare(password, user.password);
 
       if (!isMatch) {
-        return res.status(502).json({ errors: [{ msg: "Invalid Password" }] });
+        return res.status(502).json({ errors: [{ msg: 'Invalid Password' }] });
       }
 
       const payload = {
@@ -60,17 +60,17 @@ router.post(
 
       jwt.sign(
         payload,
-        config.get("jwtSecret"),
+        config.get('jwtSecret'),
         { expiresIn: 360000 },
         (err, token) => {
           if (err) throw err;
           res.json({ token });
-          console.log("Logged In Succesfully");
+          console.log('Logged In Succesfully');
         }
       );
     } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).send('Server error');
     }
   }
 );

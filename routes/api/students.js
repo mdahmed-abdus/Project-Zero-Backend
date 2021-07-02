@@ -1,33 +1,32 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const { verifyToken } = require("../../middleware/auth");
-const { check, validationResult, body } = require("express-validator"); 
-const Student = require("../../Models/student");
-
+const { verifyToken } = require('../../middleware/auth');
+const { check, validationResult, body } = require('express-validator');
+const Student = require('../../Models/student');
 
 // @route  POST api/admin/students
 // @desc   Create a student
 // @access Private
 
 router.post(
-  "/create-student",
+  '/create-student',
   verifyToken,
   [
-    check("name")
+    check('name')
       .not()
       .isEmpty()
-      .withMessage("Name is Required")
+      .withMessage('Name is Required')
       .isLength({ min: 2 })
-      .withMessage("Name should be atleast 2 letter long"),
-    check("phoneNumber")
+      .withMessage('Name should be atleast 2 letter long'),
+    check('phoneNumber')
       .not()
       .isEmpty()
       .withMessage("Please enter student's phone number")
       .isNumeric({ min: 10, max: 10 })
-      .withMessage("Please enter a valid phone number"),
-    check("year").not().isEmpty().withMessage("Year should not be empty"),
-    check("course").not().isEmpty().withMessage("Course should not be empty"),
-    check("college").not().isEmpty().withMessage("College should not be empty"),
+      .withMessage('Please enter a valid phone number'),
+    check('year').not().isEmpty().withMessage('Year should not be empty'),
+    check('course').not().isEmpty().withMessage('Course should not be empty'),
+    check('college').not().isEmpty().withMessage('College should not be empty'),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -54,7 +53,7 @@ router.post(
       if (studentPhone) {
         return res
           .status(400)
-          .json({ error: { message: "Student already exists" } });
+          .json({ error: { message: 'Student already exists' } });
       }
 
       if (!req.body.email) {
@@ -107,12 +106,12 @@ router.post(
           student = new Student({ name, phoneNumber, year, course, college });
         }
       } else {
-        req.body("email").isEmail().withMessage("Please enter a valid email");
+        req.body('email').isEmail().withMessage('Please enter a valid email');
         let studentEmail = await Student.findOne({ email });
         if (studentEmail) {
           return res
             .status(400)
-            .json({ error: { message: "Student already exists" } });
+            .json({ error: { message: 'Student already exists' } });
         }
         if (req.body.enquiryStatus == true) {
           student = new Student({
@@ -188,27 +187,27 @@ router.post(
 // @access Private
 
 router.post(
-  "/create-enquiry",
+  '/create-enquiry',
   verifyToken,
   [
-    check("name")
+    check('name')
       .not()
       .isEmpty()
-      .withMessage("Name is required")
+      .withMessage('Name is required')
       .isLength({ min: 2 })
-      .withMessage("Name should be atleast 2 letter long"),
-    check("phoneNumber")
+      .withMessage('Name should be atleast 2 letter long'),
+    check('phoneNumber')
       .not()
       .isEmpty()
       .withMessage("Please enter student's phone number")
       .isNumeric({ min: 10, max: 10 })
-      .withMessage("Please enter a valid phone number"),
-    check("offeredFees")
+      .withMessage('Please enter a valid phone number'),
+    check('offeredFees')
       .not()
       .isEmpty()
-      .withMessage("Enter the offered fees")
+      .withMessage('Enter the offered fees')
       .isNumeric()
-      .withMessage("Fees should be in number"),
+      .withMessage('Fees should be in number'),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -225,7 +224,7 @@ router.post(
       if (student) {
         return res
           .status(400)
-          .json({ error: { msg: "Student already exists" } });
+          .json({ error: { msg: 'Student already exists' } });
       }
 
       if (!req.body.email) {
@@ -241,10 +240,10 @@ router.post(
           offeredFees,
         });
       } else {
-        body("email").isEmail().withMessage("Please enter a valid email");
+        body('email').isEmail().withMessage('Please enter a valid email');
         let studentEmail = await Student.findOne({ email });
         if (studentEmail) {
-          return res.status(400).send("Student already exists");
+          return res.status(400).send('Student already exists');
         } else {
           student = new Student({
             name,
@@ -273,33 +272,33 @@ router.post(
 // @access Private
 
 router.post(
-  "/create-enrollment",
+  '/create-enrollment',
   verifyToken,
   [
-    check("name")
+    check('name')
       .not()
       .isEmpty()
-      .withMessage("Name is required")
+      .withMessage('Name is required')
       .isLength({ min: 2 })
-      .withMessage("Name should be atleast 2 letter long"),
-    check("phoneNumber")
+      .withMessage('Name should be atleast 2 letter long'),
+    check('phoneNumber')
       .not()
       .isEmpty()
       .withMessage("Please enter student's phone number")
       .isNumeric({ min: 10, max: 10 })
-      .withMessage("Please enter a valid phone number"),
-    check("offeredFees")
+      .withMessage('Please enter a valid phone number'),
+    check('offeredFees')
       .not()
       .isEmpty()
-      .withMessage("Enter the offered fees")
+      .withMessage('Enter the offered fees')
       .isNumeric()
-      .withMessage("Fees should be in number"),
-    check("actualFees")
+      .withMessage('Fees should be in number'),
+    check('actualFees')
       .not()
       .isEmpty()
-      .withMessage("Enter the actual fees")
+      .withMessage('Enter the actual fees')
       .isNumeric()
-      .withMessage("Fees should be in number"),
+      .withMessage('Fees should be in number'),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -311,7 +310,7 @@ router.post(
     try {
       let student = await Student.findOne({ phoneNumber });
       if (student) {
-        res.status(400).json({ error: { msg: "Something went wrong" } });
+        res.status(400).json({ error: { msg: 'Something went wrong' } });
       }
 
       if (!req.body.email) {
@@ -328,10 +327,10 @@ router.post(
           actualFees,
         });
       } else {
-        body("email").isEmail().withMessage("Please enter a valid email");
+        body('email').isEmail().withMessage('Please enter a valid email');
         let studentEmail = await Student.findOne({ email });
         if (studentEmail) {
-          res.status(400).json({ error: { msg: "Student already exists" } });
+          res.status(400).json({ error: { msg: 'Student already exists' } });
         } else {
           student = new Student({
             name,
@@ -360,7 +359,7 @@ router.post(
 // @desc convert a student enquiry to enrollment
 // @access Private
 
-router.put("/enquiry-to-enrollment/:id", verifyToken, async (req, res) => {
+router.put('/enquiry-to-enrollment/:id', verifyToken, async (req, res) => {
   try {
     const student = await Student.findOne({ _id: req.params.id });
     student.enquiryStatus = false;
@@ -380,14 +379,14 @@ router.put("/enquiry-to-enrollment/:id", verifyToken, async (req, res) => {
 // @desc   Find a student by phone number
 // @access Private
 
-router.get("/find-student/:phoneNumber", verifyToken, async (req, res) => {
+router.get('/find-student/:phoneNumber', verifyToken, async (req, res) => {
   try {
     const student = await Student.findOne({
       phoneNumber: req.params.phoneNumber,
     });
 
     if (!student) {
-      return res.status(404).json({ error: { msg: "Student already exists" } });
+      return res.status(404).json({ error: { msg: 'Student already exists' } });
     }
 
     return res.status(200).json(student);
@@ -400,7 +399,7 @@ router.get("/find-student/:phoneNumber", verifyToken, async (req, res) => {
 // @desc   update the details of a student
 // @access Private
 
-router.put("/update-student/:phoneNumber", verifyToken, async (req, res) => {
+router.put('/update-student/:phoneNumber', verifyToken, async (req, res) => {
   try {
     const {
       name,
@@ -421,7 +420,7 @@ router.put("/update-student/:phoneNumber", verifyToken, async (req, res) => {
     });
 
     if (!student) {
-      return res.status(404).json({ msg: "Student not found" });
+      return res.status(404).json({ msg: 'Student not found' });
     }
 
     if (name) student.name = name;
@@ -458,7 +457,7 @@ router.put("/update-student/:phoneNumber", verifyToken, async (req, res) => {
 // @desc   delete a student entry
 // @access Private
 
-router.delete("/delete-student/:phoneNumber", verifyToken, async (req, res) => {
+router.delete('/delete-student/:phoneNumber', verifyToken, async (req, res) => {
   try {
     await Student.findOneAndDelete(
       { phoneNumber: req.params.phoneNumber },
@@ -468,7 +467,7 @@ router.delete("/delete-student/:phoneNumber", verifyToken, async (req, res) => {
         } else {
           return res
             .status(400)
-            .json({ error: { message: "Something went wrong" } });
+            .json({ error: { message: 'Something went wrong' } });
         }
       }
     );
@@ -481,11 +480,11 @@ router.delete("/delete-student/:phoneNumber", verifyToken, async (req, res) => {
 // @desc   get list of all the students
 // @access Private
 
-router.get("/list-students", verifyToken, async (req, res) => {
+router.get('/list-students', verifyToken, async (req, res) => {
   try {
     const listOfStudents = await Student.find((err, students) => {
       if (!students || err) {
-        return res.status(404).json({ msg: "Something went wrong" });
+        return res.status(404).json({ msg: 'Something went wrong' });
       }
     });
     return res.status(200).json(listOfStudents);
@@ -498,7 +497,7 @@ router.get("/list-students", verifyToken, async (req, res) => {
 // @desc   get list of all the students enquiries
 // @access Private
 
-router.get("/list-all-enquiries", verifyToken, async (req, res) => {
+router.get('/list-all-enquiries', verifyToken, async (req, res) => {
   try {
     const enquiryFilter = { enquiryStatus: true };
     const listOfEnquiries = await Student.find(
@@ -506,7 +505,7 @@ router.get("/list-all-enquiries", verifyToken, async (req, res) => {
       (err, listOfEnquiries) => {
         if (!listOfEnquiries) {
           return res.status(404).json({
-            msg: "No enrolled students",
+            msg: 'No enrolled students',
           });
         }
       }
@@ -521,7 +520,7 @@ router.get("/list-all-enquiries", verifyToken, async (req, res) => {
 // @desc   get list of all the enrolled students
 // @access Private
 
-router.get("/list-all-enrollments", verifyToken, async (req, res, next) => {
+router.get('/list-all-enrollments', verifyToken, async (req, res, next) => {
   try {
     const enrollmentFilter = { enrollmentStatus: true };
     const listOfEnrollments = await Student.find(
@@ -529,7 +528,7 @@ router.get("/list-all-enrollments", verifyToken, async (req, res, next) => {
       (err, listOfEnrollments) => {
         if (!listOfEnrollments) {
           return res.status(404).json({
-            msg: "No enrolled students",
+            msg: 'No enrolled students',
           });
         }
       }
@@ -545,7 +544,7 @@ router.get("/list-all-enrollments", verifyToken, async (req, res, next) => {
 // @access Private
 
 router.get(
-  "/list-all-enquiries-in-last-30-days",
+  '/list-all-enquiries-in-last-30-days',
   verifyToken,
   async (req, res) => {
     try {
@@ -565,7 +564,7 @@ router.get(
         (err, listOfEnquiriesInThirtyDays) => {
           if (err || listOfEnquiriesInThirtyDays === 0) {
             return res.status(404).json({
-              message: "No enquiries in last 30 days",
+              message: 'No enquiries in last 30 days',
             });
           }
         }
@@ -582,7 +581,7 @@ router.get(
 // @access Private
 
 router.get(
-  "/list-all-enquiries-in-last-90-days",
+  '/list-all-enquiries-in-last-90-days',
   verifyToken,
   async (req, res) => {
     try {
@@ -602,7 +601,7 @@ router.get(
         (err, listOfEnquiriesInNinetyDays) => {
           if (err || listOfEnquiriesInNinetyDays === 0) {
             return res.status(404).json({
-              message: "No enquiries in last 90 days",
+              message: 'No enquiries in last 90 days',
             });
           }
         }
@@ -619,7 +618,7 @@ router.get(
 // @access Private
 
 router.get(
-  "/list-all-enquiries-in-last-year",
+  '/list-all-enquiries-in-last-year',
   verifyToken,
   async (req, res) => {
     try {
@@ -637,7 +636,7 @@ router.get(
         (err, listOfEnquiriesInLastYear) => {
           if (err || listOfEnquiriesInLastYear === 0) {
             return res.status(404).json({
-              message: "No enquiries in the last year",
+              message: 'No enquiries in the last year',
             });
           }
         }
@@ -653,7 +652,7 @@ router.get(
 // @desc   get number of all the students
 // @access Private
 
-router.get("/number-of-students", verifyToken, async (req, res) => {
+router.get('/number-of-students', verifyToken, async (req, res) => {
   try {
     await Student.countDocuments((err, numOfStudents) => {
       if (!err || numOfStudents !== 0) {
@@ -669,7 +668,7 @@ router.get("/number-of-students", verifyToken, async (req, res) => {
 // @desc   get number of all the enquiries
 // @access Private
 
-router.get("/number-of-enquiries", verifyToken, async (req, res) => {
+router.get('/number-of-enquiries', verifyToken, async (req, res) => {
   try {
     const numberOfEnquiries = await Student.countDocuments(
       { enquiryStatus: true },
@@ -688,7 +687,7 @@ router.get("/number-of-enquiries", verifyToken, async (req, res) => {
 // @desc   get number of all the enrollments
 // @access Private
 
-router.get("/number-of-enrollments", verifyToken, async (req, res) => {
+router.get('/number-of-enrollments', verifyToken, async (req, res) => {
   try {
     await Student.countDocuments(
       { enrollmentStatus: true },
@@ -708,7 +707,7 @@ router.get("/number-of-enrollments", verifyToken, async (req, res) => {
 // @access Private
 
 router.get(
-  "/number-of-enquiries-in-last-30-days",
+  '/number-of-enquiries-in-last-30-days',
   verifyToken,
   async (req, res) => {
     try {
@@ -742,7 +741,7 @@ router.get(
 // @access Private
 
 router.get(
-  "/number-of-enquiries-in-last-90-days",
+  '/number-of-enquiries-in-last-90-days',
   verifyToken,
   async (req, res) => {
     try {
@@ -776,7 +775,7 @@ router.get(
 // @access Private
 
 router.get(
-  "/number-of-enquiries-in-last-year",
+  '/number-of-enquiries-in-last-year',
   verifyToken,
   async (req, res) => {
     try {
@@ -813,7 +812,7 @@ router.get(
 // @access Private
 
 router.get(
-  "/number-of-enrollments-in-last-30-days",
+  '/number-of-enrollments-in-last-30-days',
   verifyToken,
   async (req, res) => {
     try {
@@ -836,7 +835,7 @@ router.get(
           }
           if (numOfEnrollmentsInThirtyDays === 0) {
             return res.status(404).json({
-              message: "No enrollments in last 30 days",
+              message: 'No enrollments in last 30 days',
             });
           }
         }
@@ -857,7 +856,7 @@ router.get(
 // @access Private
 
 router.get(
-  "/number-of-enrollments-in-last-90-days",
+  '/number-of-enrollments-in-last-90-days',
   verifyToken,
   async (req, res) => {
     try {
@@ -880,7 +879,7 @@ router.get(
           }
           if (numOfEnrollmentsInNinetyDays === 0) {
             return res.status(404).json({
-              message: "No enrollments in last 30 days",
+              message: 'No enrollments in last 30 days',
             });
           }
         }
@@ -897,7 +896,7 @@ router.get(
 // @access Private
 
 router.get(
-  "/number-of-enrollments-in-last-year",
+  '/number-of-enrollments-in-last-year',
   verifyToken,
   async (req, res) => {
     try {
@@ -918,7 +917,7 @@ router.get(
           }
           if (numOfEnrollmentsInLastYear === 0) {
             return res.status(404).json({
-              message: "No enrollments in last 30 days",
+              message: 'No enrollments in last 30 days',
             });
           }
         }

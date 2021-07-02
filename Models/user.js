@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 // change schema name
 const userSchema = new mongoose.Schema({
@@ -30,4 +30,4 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-module.exports = User = mongoose.model("user", userSchema);
+module.exports = User = mongoose.model('user', userSchema);
