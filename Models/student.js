@@ -11,7 +11,6 @@ const studentSchema = new mongoose.Schema({
   email: {
     type: String,
     trim: true,
-    required: false,
     minlength: 8,
     maxlength: 128,
   },
@@ -22,31 +21,25 @@ const studentSchema = new mongoose.Schema({
   },
   enquiryStatus: {
     type: Boolean,
-    required: true,
     default: false,
   },
   enquiryDate: {
     type: Date,
-    required: false,
   },
   isEnquiryActive: {
     type: Boolean,
-    required: true,
     default: false,
   },
   enrollmentStatus: {
     type: Boolean,
-    required: true,
     default: false,
   },
   isEnrollmentActive: {
     type: Boolean,
-    required: true,
     default: false,
   },
   enrollmentDate: {
     type: Date,
-    required: false,
   },
   year: {
     type: String,
@@ -62,13 +55,9 @@ const studentSchema = new mongoose.Schema({
   },
   offeredFees: {
     type: Number,
-    required: false,
-    trim: true,
   },
   actualFees: {
     type: Number,
-    required: false,
-    trim: true,
   },
 });
 
