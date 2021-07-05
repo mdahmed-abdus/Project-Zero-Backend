@@ -1,9 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const { verifyToken } = require("../../middleware/auth");
-const { check, validationResult, body } = require("express-validator"); 
+const { check, validationResult, body } = require("express-validator");
 const Student = require("../../Models/student");
-
 
 // @route  POST api/admin/students
 // @desc   Create a student
@@ -485,9 +484,10 @@ router.get("/list-students", verifyToken, async (req, res) => {
   try {
     const listOfStudents = await Student.find((err, students) => {
       if (!students || err) {
+        console.log(err);
         return res.status(404).json({ msg: "Something went wrong" });
       }
-    });
+    }).sort({ date: -1 });
     return res.status(200).json(listOfStudents);
   } catch (err) {
     return res.status(500).json(err.message);
@@ -510,7 +510,7 @@ router.get("/list-all-enquiries", verifyToken, async (req, res) => {
           });
         }
       }
-    );
+    ).sort({ date: -1 });
     return res.status(200).json(listOfEnquiries);
   } catch (err) {
     return res.status(500).json(err.message);
@@ -650,18 +650,129 @@ router.get(
 );
 
 // @route  GET api/admin/students
+// @desc   get all the enquires of last 30 days
+// @access Private
+
+router.get(
+  "/list-all-enquiries-in-last-30-days",
+  verifyToken,
+  async (req, res) => {
+    try {
+      const currentDate = new Date();
+      let thirtyDaysBefore = new Date();
+      thirtyDaysBefore = thirtyDaysBefore.setDate(
+        thirtyDaysBefore.getDate() - 30
+      );
+
+      fetchQuery = {
+        enquiryDate: { $gte: thirtyDaysBefore, $lte: currentDate },
+        enquiryStatus: true,
+      };
+
+      const listOfEnquiriesInThirtyDays = await Student.find(
+        fetchQuery,
+        (err, listOfEnquiriesInThirtyDays) => {
+          if (err || listOfEnquiriesInThirtyDays === 0) {
+            return res.status(404).json({
+              message: "No enquiries in last 30 days",
+            });
+          }
+        }
+      );
+      res.status(200).json(listOfEnquiriesInThirtyDays);
+    } catch (err) {
+      res.status(500).send(err.message);
+    }
+  }
+);
+
+// @route  GET api/admin/students
+// @desc   get all the enquires of last 90 days
+// @access Private
+
+router.get(
+  "/list-all-enquiries-in-last-90-days",
+  verifyToken,
+  async (req, res) => {
+    try {
+      const currentDate = new Date();
+      let ninetyDaysBefore = new Date();
+      ninetyDaysBefore = ninetyDaysBefore.setDate(
+        ninetyDaysBefore.getDate() - 90
+      );
+
+      fetchQuery = {
+        enquiryDate: { $gte: ninetyDaysBefore, $lte: currentDate },
+        enquiryStatus: true,
+      };
+
+      const listOfEnquiriesInNinetyDays = await Student.find(
+        fetchQuery,
+        (err, listOfEnquiriesInNinetyDays) => {
+          if (err || listOfEnquiriesInNinetyDays === 0) {
+            return res.status(404).json({
+              message: "No enquiries in last 90 days",
+            });
+          }
+        }
+      );
+      res.status(200).json(listOfEnquiriesInNinetyDays);
+    } catch (err) {
+      res.status(500).send(err.message);
+    }
+  }
+);
+
+// @route  GET api/admin/students
+// @desc   get all the enquires in last year
+// @access Private
+
+router.get(
+  "/list-all-enquiries-in-last-year",
+  verifyToken,
+  async (req, res) => {
+    try {
+      const currentDate = new Date();
+      let oneYearBefore = new Date();
+      oneYearBefore = oneYearBefore.setDate(oneYearBefore.getDate() - 365);
+
+      fetchQuery = {
+        enquiryDate: { $gte: oneYearBefore, $lte: currentDate },
+        enquiryStatus: true,
+      };
+
+      const listOfEnquiriesInLastYear = await Student.find(
+        fetchQuery,
+        (err, listOfEnquiriesInLastYear) => {
+          if (err || listOfEnquiriesInLastYear === 0) {
+            return res.status(404).json({
+              message: "No enquiries in the last year",
+            });
+          }
+        }
+      );
+      res.status(200).json(listOfEnquiriesInLastYear);
+    } catch (err) {
+      res.status(500).json(err.message);
+    }
+  }
+);
+
+// @route  GET api/admin/students
 // @desc   get number of all the students
 // @access Private
 
-router.get("/number-of-students", verifyToken, async (req, res) => {
+router.get("/number-of-students", async (req, res) => {
   try {
-    await Student.countDocuments((err, numOfStudents) => {
-      if (!err || numOfStudents !== 0) {
+    await Student.countDocuments((err, numberOfStudents) => {
+      if (!err) {
         return res.status(200).json(numberOfStudents);
+      } else {
+        return res.status(400).json(err);
       }
     });
   } catch (err) {
-    return res.status(500).json(err.message);
+    return res.status(500).json(err);
   }
 });
 
@@ -669,18 +780,20 @@ router.get("/number-of-students", verifyToken, async (req, res) => {
 // @desc   get number of all the enquiries
 // @access Private
 
-router.get("/number-of-enquiries", verifyToken, async (req, res) => {
+router.get("/number-of-enquiries", async (req, res) => {
   try {
-    const numberOfEnquiries = await Student.countDocuments(
+    await Student.countDocuments(
       { enquiryStatus: true },
-      (err, numOfEnquiries) => {
-        if (!err || numOfEnquiries !== 0) {
+      (err, numberOfEnquiries) => {
+        if (!err) {
           return res.status(200).json(numberOfEnquiries);
+        } else {
+          return res.status(400).json(err);
         }
       }
     );
   } catch (err) {
-    return res.status(500).json(err.message);
+    return res.status(500).json(err);
   }
 });
 
@@ -688,18 +801,20 @@ router.get("/number-of-enquiries", verifyToken, async (req, res) => {
 // @desc   get number of all the enrollments
 // @access Private
 
-router.get("/number-of-enrollments", verifyToken, async (req, res) => {
+router.get("/number-of-enrollments", async (req, res) => {
   try {
     await Student.countDocuments(
-      { enrollmentStatus: true },
+      { enquiryStatus: true },
       (err, numberOfEnrollments) => {
-        if (!err || numberOfEnrollments !== 0) {
+        if (!err) {
           return res.status(200).json(numberOfEnrollments);
+        } else {
+          return res.status(400).json(err);
         }
       }
     );
   } catch (err) {
-    return res.status(500).json(err.message);
+    return res.status(500).json(err);
   }
 });
 
@@ -709,7 +824,7 @@ router.get("/number-of-enrollments", verifyToken, async (req, res) => {
 
 router.get(
   "/number-of-enquiries-in-last-30-days",
-  verifyToken,
+
   async (req, res) => {
     try {
       const currentDate = new Date();
@@ -727,12 +842,12 @@ router.get(
         fetchQuery,
         (err, numberOfEnquiriesInThirtyDays) => {
           if (!err || numberOfEnquiriesInThirtyDays !== 0) {
-            res.status(200).json(numberOfEnquiriesInThirtyDays);
+            return res.status(200).json(numberOfEnquiriesInThirtyDays);
           }
         }
       );
     } catch (err) {
-      res.status(500).json(err.message);
+      return res.status(500).json(err.message);
     }
   }
 );
@@ -743,7 +858,113 @@ router.get(
 
 router.get(
   "/number-of-enquiries-in-last-90-days",
-  verifyToken,
+
+  async (req, res) => {
+    try {
+      const currentDate = new Date();
+      let ninetyDaysBefore = new Date();
+      ninetyDaysBefore = ninetyDaysBefore.setDate(
+        ninetyDaysBefore.getDate() - 30
+      );
+
+      fetchQuery = {
+        enquiryDate: { $gte: ninetyDaysBefore, $lte: currentDate },
+        enquiryStatus: true,
+      };
+
+      await Student.countDocuments(
+        fetchQuery,
+        (err, numberOfEnquiriesInNinetyDays) => {
+          if (!err) {
+            return res.status(200).json(numberOfEnquiriesInNinetyDays);
+          } else {
+            return res.status(400).json(err);
+          }
+        }
+      );
+    } catch (err) {
+      return res.status(500).json(err.message);
+    }
+  }
+);
+
+// @route  POST api/admin/students
+// @desc   get all the enquires of year
+// @access Private
+
+router.get(
+  "/number-of-enquiries-in-last-year",
+
+  async (req, res) => {
+    try {
+      const currentDate = new Date();
+      let oneYearBefore = new Date();
+      oneYearBefore = oneYearBefore.setDate(oneYearBefore.getDate() - 365);
+
+      fetchQuery = {
+        enquiryDate: { $gte: oneYearBefore, $lte: currentDate },
+        enquiryStatus: true,
+      };
+
+      await Student.countDocuments(
+        fetchQuery,
+        (err, numberOfEnquiriesInLastYear) => {
+          if (!err) {
+            return res.status(200).json(numberOfEnquiriesInLastYear);
+          } else {
+            return res.status(400).json(err);
+          }
+        }
+      );
+    } catch (err) {
+      return res.status(500).json(err.message);
+    }
+  }
+);
+
+// @route  GET api/admin/students
+// @desc   get all the enrollments in last 30 days
+// @access Private
+
+router.get(
+  "/number-of-enrollments-in-last-30-days",
+
+  async (req, res) => {
+    try {
+      const currentDate = new Date();
+      let thirtyDaysBefore = new Date();
+      thirtyDaysBefore = thirtyDaysBefore.setDate(
+        thirtyDaysBefore.getDate() - 30
+      );
+
+      fetchQuery = {
+        enquiryDate: { $gte: thirtyDaysBefore, $lte: currentDate },
+        enquiryStatus: true,
+      };
+
+      await Student.countDocuments(
+        fetchQuery,
+        (err, numberOfEnrollmentsInLastThirtyDays) => {
+          if (!err) {
+            return res.status(200).json(numberOfEnrollmentsInLastThirtyDays);
+          } else {
+            return res.status(400).json(err);
+          }
+        }
+      );
+    } catch (err) {
+      return res.status(500).json(err.message);
+    }
+  }
+);
+
+// @route  GET api/admin/students
+// @desc   get all the enrollments in last 90 days
+// @access Private
+
+router.get(
+  "/number-of-enrollments-in-last-90-days",
+
   async (req, res) => {
     try {
       const currentDate = new Date();
@@ -759,173 +980,50 @@ router.get(
 
       await Student.countDocuments(
         fetchQuery,
-        (err, numberOfEnquiriesInNinetyDays) => {
-          if (err || numberOfEnquiriesInNinetyDays === 0) {
-            res.status(200).json(numberOfEnquiriesInNinetyDays);
+        (err, numberOfEnrollmentsInLastNinetyDays) => {
+          if (!err) {
+            return res.status(200).json(numberOfEnrollmentsInLastNinetyDays);
+          } else {
+            return res.status(400).json(err);
           }
         }
       );
     } catch (err) {
-      res.status(500).json(err.message);
+      return res.status(500).json(err);
     }
   }
 );
 
-// @route  POST api/students
-// @desc   get all the enquires of year
+// @route  GET api/admin/students
+// @desc   get all the enrollments in last one year
 // @access Private
 
 router.get(
-  "/number-of-enquiries-in-last-year",
-  verifyToken,
+  "/number-of-enrollments-in-last-year",
+
   async (req, res) => {
     try {
       const currentDate = new Date();
       let oneYearBefore = new Date();
-      oneYearBefore = oneYearBefore.setDate(oneYearBefore.getDate() - 365);
+      oneYearBefore = oneYearBefore.setDate(oneYearBefore.getDate() - 90);
 
       fetchQuery = {
         enquiryDate: { $gte: oneYearBefore, $lte: currentDate },
         enquiryStatus: true,
       };
 
-      const numberOfEnquiriesInLastYear = await Student.countDocuments(
+      await Student.countDocuments(
         fetchQuery,
-        (err, numOfEnquiriesInLastYear) => {
-          if (!err || numOfEnquiriesInLastYear === 0) {
+        (err, numberOfEnrollmentsInLastYear) => {
+          if (!err) {
+            return res.status(200).json(numberOfEnrollmentsInLastYear);
+          } else {
             return res.status(400).json(err);
           }
         }
       );
-      res
-        .status(200)
-        .json(
-          `Number of enquiries in last year: ${numberOfEnquiriesInLastYear}`
-        );
     } catch (err) {
-      res.status(500).json(err.message);
-    }
-  }
-);
-
-// @route  GET api/admin/students
-// @desc   get all the enrollments in last 30 days
-// @access Private
-
-router.get(
-  "/number-of-enrollments-in-last-30-days",
-  verifyToken,
-  async (req, res) => {
-    try {
-      const currentDate = new Date();
-      let thirtyDaysBefore = new Date();
-      thirtyDaysBefore = thirtyDaysBefore.setDate(
-        thirtyDaysBefore.getDate() - 30
-      );
-
-      fetchQuery = {
-        enquiryDate: { $gte: thirtyDaysBefore, $lte: currentDate },
-        enrollmentStatus: true,
-      };
-
-      const numberOfEnrollmentsInThirtyDays = await Student.countDocuments(
-        fetchQuery,
-        (err, numOfEnrollmentsInThirtyDays) => {
-          if (err) {
-            return res.status(400).json(err);
-          }
-          if (numOfEnrollmentsInThirtyDays === 0) {
-            return res.status(404).json({
-              message: "No enrollments in last 30 days",
-            });
-          }
-        }
-      );
-      res
-        .status(200)
-        .json(
-          `Number of enrollments in last 30 days: ${numberOfEnrollmentsInThirtyDays}`
-        );
-    } catch (err) {
-      res.status(500).json(err.message);
-    }
-  }
-);
-
-// @route  GET api/admin/students
-// @desc   get all the enrollments in last 90 days
-// @access Private
-
-router.get(
-  "/number-of-enrollments-in-last-90-days",
-  verifyToken,
-  async (req, res) => {
-    try {
-      const currentDate = new Date();
-      let ninetyDaysBefore = new Date();
-      ninetyDaysBefore = ninetyDaysBefore.setDate(
-        ninetyDaysBefore.getDate() - 90
-      );
-
-      fetchQuery = {
-        enquiryDate: { $gte: ninetyDaysBefore, $lte: currentDate },
-        enrollmentStatus: true,
-      };
-
-      const numberOfEnrollmentsInNinetyDays = await Student.countDocuments(
-        fetchQuery,
-        (err, numOfEnrollmentsInNinetyDays) => {
-          if (err) {
-            return res.status(400).json(err);
-          }
-          if (numOfEnrollmentsInNinetyDays === 0) {
-            return res.status(404).json({
-              message: "No enrollments in last 30 days",
-            });
-          }
-        }
-      );
-      res.status(200).json(numberOfEnrollmentsInNinetyDays);
-    } catch (err) {
-      res.status(500).json(err.message);
-    }
-  }
-);
-
-// @route  GET api/admin/students
-// @desc   get the number the enrollments in last one year
-// @access Private
-
-router.get(
-  "/number-of-enrollments-in-last-year",
-  verifyToken,
-  async (req, res) => {
-    try {
-      const currentDate = new Date();
-      let oneYearBefore = new Date();
-      oneYearBefore = oneYearBefore.setDate(oneYearBefore.getDate() - 365);
-
-      fetchQuery = {
-        enquiryDate: { $gte: oneYearBefore, $lte: currentDate },
-        enrollmentStatus: true,
-      };
-
-      const numberOfEnrollmentsInLastYear = await Student.countDocuments(
-        fetchQuery,
-        (err, numOfEnrollmentsInLastYear) => {
-          if (err) {
-            return res.status(400).json(err);
-          }
-          if (numOfEnrollmentsInLastYear === 0) {
-            return res.status(404).json({
-              message: "No enrollments in last 30 days",
-            });
-          }
-        }
-      );
-      res.status(200).json(numberOfEnrollmentsInLastYear);
-    } catch (err) {
-      res.status(500).json(err.message);
+      return res.status(500).json(err);
     }
   }
 );
