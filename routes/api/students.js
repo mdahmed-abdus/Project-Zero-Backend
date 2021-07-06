@@ -510,7 +510,7 @@ router.get("/list-all-enquiries", verifyToken, async (req, res) => {
           });
         }
       }
-    ).sort({ date: -1 });
+    ).sort({ enquiryDate: -1 });
     return res.status(200).json(listOfEnquiries);
   } catch (err) {
     return res.status(500).json(err.message);
@@ -533,7 +533,7 @@ router.get("/list-all-enrollments", verifyToken, async (req, res, next) => {
           });
         }
       }
-    );
+    ).sort({ enrollmentDate: -1 });
     return res.json.status(200)(listOfEnrollments);
   } catch (err) {
     return res.status(500).json(err.message);
@@ -562,17 +562,15 @@ router.get(
 
       const listOfEnquiriesInThirtyDays = await Student.find(
         fetchQuery,
-        (err, listOfEnquiriesInThirtyDays) => {
-          if (err || listOfEnquiriesInThirtyDays === 0) {
-            return res.status(404).json({
-              message: "No enquiries in last 30 days",
-            });
+        (err) => {
+          if (err) {
+            return res.status(404).json(err);
           }
         }
-      );
-      res.status(200).json(listOfEnquiriesInThirtyDays);
+      ).sort({ enquiryDate: -1 });
+      return res.status(200).json(listOfEnquiriesInThirtyDays);
     } catch (err) {
-      res.status(500).send(err.message);
+      return res.status(500).send(err.message);
     }
   }
 );
@@ -599,17 +597,15 @@ router.get(
 
       const listOfEnquiriesInNinetyDays = await Student.find(
         fetchQuery,
-        (err, listOfEnquiriesInNinetyDays) => {
-          if (err || listOfEnquiriesInNinetyDays === 0) {
-            return res.status(404).json({
-              message: "No enquiries in last 90 days",
-            });
+        (err) => {
+          if (err) {
+            return res.status(404).json(err);
           }
         }
-      );
-      res.status(200).json(listOfEnquiriesInNinetyDays);
+      ).sort({ enquiryDate: -1 });
+      return res.status(200).json(listOfEnquiriesInNinetyDays);
     } catch (err) {
-      res.status(500).send(err.message);
+      return res.status(500).send(err.message);
     }
   }
 );
@@ -634,27 +630,25 @@ router.get(
 
       const listOfEnquiriesInLastYear = await Student.find(
         fetchQuery,
-        (err, listOfEnquiriesInLastYear) => {
+        (err) => {
           if (err || listOfEnquiriesInLastYear === 0) {
-            return res.status(404).json({
-              message: "No enquiries in the last year",
-            });
+            return res.status(404).json(err);
           }
         }
-      );
-      res.status(200).json(listOfEnquiriesInLastYear);
+      ).sort({ enquiryDate: -1 });
+      return res.status(200).json(listOfEnquiriesInLastYear);
     } catch (err) {
-      res.status(500).json(err.message);
+      return res.status(500).json(err.message);
     }
   }
 );
 
 // @route  GET api/admin/students
-// @desc   get all the enquires of last 30 days
+// @desc   get all the enrollments of last 30 days
 // @access Private
 
 router.get(
-  "/list-all-enquiries-in-last-30-days",
+  "/list-all-enrollments-in-last-30-days",
   verifyToken,
   async (req, res) => {
     try {
@@ -669,19 +663,17 @@ router.get(
         enquiryStatus: true,
       };
 
-      const listOfEnquiriesInThirtyDays = await Student.find(
+      const listOfEnrollmentsInThirtyDays = await Student.find(
         fetchQuery,
-        (err, listOfEnquiriesInThirtyDays) => {
-          if (err || listOfEnquiriesInThirtyDays === 0) {
-            return res.status(404).json({
-              message: "No enquiries in last 30 days",
-            });
+        (err) => {
+          if (err) {
+            return res.status(404).json(err);
           }
         }
-      );
-      res.status(200).json(listOfEnquiriesInThirtyDays);
+      ).sort({ enrollmentDate: -1 });
+      return res.status(200).json(listOfEnrollmentsInThirtyDays);
     } catch (err) {
-      res.status(500).send(err.message);
+      return res.status(500).send(err);
     }
   }
 );
@@ -691,7 +683,7 @@ router.get(
 // @access Private
 
 router.get(
-  "/list-all-enquiries-in-last-90-days",
+  "/list-all-enrollments-in-last-90-days",
   verifyToken,
   async (req, res) => {
     try {
@@ -702,23 +694,21 @@ router.get(
       );
 
       fetchQuery = {
-        enquiryDate: { $gte: ninetyDaysBefore, $lte: currentDate },
-        enquiryStatus: true,
+        enrollmentDate: { $gte: ninetyDaysBefore, $lte: currentDate },
+        enrollmentStatus: true,
       };
 
-      const listOfEnquiriesInNinetyDays = await Student.find(
+      const listOfEnrollmentsInNinetyDays = await Student.find(
         fetchQuery,
-        (err, listOfEnquiriesInNinetyDays) => {
-          if (err || listOfEnquiriesInNinetyDays === 0) {
-            return res.status(404).json({
-              message: "No enquiries in last 90 days",
-            });
+        (err) => {
+          if (err) {
+            return res.status(404).json(err);
           }
         }
-      );
-      res.status(200).json(listOfEnquiriesInNinetyDays);
+      ).sort({ enrollmentDate: -1 });
+      return res.status(200).json(listOfEnrollmentsInNinetyDays);
     } catch (err) {
-      res.status(500).send(err.message);
+      return res.status(500).send(err);
     }
   }
 );
@@ -728,7 +718,7 @@ router.get(
 // @access Private
 
 router.get(
-  "/list-all-enquiries-in-last-year",
+  "/list-all-enrollments-in-last-year",
   verifyToken,
   async (req, res) => {
     try {
@@ -737,23 +727,21 @@ router.get(
       oneYearBefore = oneYearBefore.setDate(oneYearBefore.getDate() - 365);
 
       fetchQuery = {
-        enquiryDate: { $gte: oneYearBefore, $lte: currentDate },
-        enquiryStatus: true,
+        enrollmentDate: { $gte: oneYearBefore, $lte: currentDate },
+        enrollmentStatus: true,
       };
 
-      const listOfEnquiriesInLastYear = await Student.find(
+      const listOfEnrollmentsInLastYear = await Student.find(
         fetchQuery,
-        (err, listOfEnquiriesInLastYear) => {
-          if (err || listOfEnquiriesInLastYear === 0) {
-            return res.status(404).json({
-              message: "No enquiries in the last year",
-            });
+        (err) => {
+          if (err) {
+            return res.status(404).json(err);
           }
         }
-      );
-      res.status(200).json(listOfEnquiriesInLastYear);
+      ).sort({ enrollmentDate: -1 });
+      return res.status(200).json(listOfEnrollmentsInLastYear);
     } catch (err) {
-      res.status(500).json(err.message);
+      return res.status(500).json(err);
     }
   }
 );
