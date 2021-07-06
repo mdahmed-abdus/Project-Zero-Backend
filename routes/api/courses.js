@@ -1,17 +1,16 @@
 const express = require("express");
-const fs = require("fs");
+const fs = require("fs-extra");
 const _ = require("lodash");
 const formidable = require("formidable");
 const router = express.Router();
 const { verifyToken } = require("../../middleware/auth");
-// const { check, validationResult } = require("express-validator");
 const Course = require("../../Models/course");
 
 // @route POST api/admin/courses
 // @desc Create a course description
 // @access Private
 
-router.post("/create-course", verifyToken, async (req, res, next) => {
+router.post("/create-course", verifyToken, async (req, res) => {
   // Basic Setup
   let form = new formidable.IncomingForm();
   form.keepExtensions = true;
@@ -66,6 +65,7 @@ router.post("/create-course", verifyToken, async (req, res, next) => {
         course.photo.data = fs.readFileSync(files.photo.path);
         course.photo.contentType = files.photo.type;
       }
+
       await course.save();
       return res.status(200).json({ course });
     } catch (err) {
@@ -96,27 +96,60 @@ router.get("/list-courses", verifyToken, async (req, res) => {
 // @access Private
 
 router.put("/update-course/:id", verifyToken, async (req, res) => {
-  try {
-    const { name, authorName, fees, numberOfLectures, duration, rating } =
-      req.body;
-    const course = await Course.findOne({ _id: req.params.id });
+  // Basic Setup
+  let form = new formidable.IncomingForm();
+  form.keepExtensions = true;
 
-    if (!course) {
-      return res.status(404).json({ message: "Course not found" });
+  // Form Parsing
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      console.log("Error parsing the files");
+      return res.status(400).json({
+        status: "Fail",
+        message: "There was an error parsing the files",
+        error: err,
+      });
     }
 
-    if (name) course.name = name;
-    if (authorName) course.authorName = authorName;
-    if (fees) course.fees = fees;
-    if (numberOfLectures) course.numberOfLectures = numberOfLectures;
-    if (duration) course.duration = duration;
-    if (rating) course.rating = rating;
+    const { name, authorName, fees, numberOfLectures, duration, rating } =
+      fields;
 
-    await course.save();
-    return res.status(200).json(course);
-  } catch (err) {
-    return res.status(500).send(err.message);
-  }
+    if (
+      !name ||
+      !authorName ||
+      !fees ||
+      !numberOfLectures ||
+      !duration ||
+      !rating
+    ) {
+      return res.status(400).json({
+        err: "All fields are required - name, authorName, fees, numberOfLectures, duration, rating",
+      });
+    }
+
+    try {
+      let course = req.course;
+      course = _.extend(course, fields);
+
+      if (files.photo) {
+        // console.log("PHOTO", files.photo);
+        if (files.photo.size > 10 * 1024 * 1024) {
+          return res.status(400).json({
+            error: "Image size should be less then 1 MB",
+          });
+        }
+
+        course.photo.data = fs.readFileSync(files.photo.path);
+        course.photo.contentType = files.photo.type;
+      }
+
+      await course.save();
+      return res.status(200).json(course);
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json(err);
+    }
+  });
 });
 
 // @route DELETE api/admin/courses

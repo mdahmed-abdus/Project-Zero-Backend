@@ -71,6 +71,7 @@ typings/
 # dotenv environment variables file
 .env
 .env.test
+.vscode
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -106,3 +107,4 @@ dist
 /Essentials
 /controllers
 temp.js
+studentsErrors.js
