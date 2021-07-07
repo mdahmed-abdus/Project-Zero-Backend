@@ -6,8 +6,6 @@ const { SignUp } = require("../../controllers/userController");
 // @desc   Test route
 // @access Public
 
-// add regrex for username and password
-
 router.post("/sign-up", SignUp);
 
 module.exports = router;
