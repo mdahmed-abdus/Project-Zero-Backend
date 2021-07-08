@@ -2,6 +2,7 @@ const fs = require("fs");
 const _ = require("lodash");
 const formidable = require("formidable");
 const Course = require("../Models/course");
+const { updateCourseSchema } = require("../validators/courseValidator");
 
 // @route POST api/admin/courses
 // @desc Create a course description
@@ -90,61 +91,55 @@ exports.listCourses = async (req, res) => {
 // @access Private
 
 exports.updateCourse = async (req, res) => {
-    // Basic Setup
-    let form = new formidable.IncomingForm();
-    form.keepExtensions = true;
-  
-    // Form Parsing
-    form.parse(req, async (err, fields, files) => {
-      if (err) {
-        console.log("Error parsing the files");
-        return res.status(400).json({
-          status: "Fail",
-          message: "There was an error parsing the files",
-          error: err,
-        });
-      }
-  
-      const { name, authorName, fees, numberOfLectures, duration, rating } =
-        fields;
-  
-      if (
-        !name ||
-        !authorName ||
-        !fees ||
-        !numberOfLectures ||
-        !duration ||
-        !rating
-      ) {
-        return res.status(400).json({
-          err: "All fields are required - name, authorName, fees, numberOfLectures, duration, rating",
-        });
-      }
-  
-      try {
-        let course = req.course;
-        course = _.extend(course, fields);
-  
-        if (files.photo) {
-          // console.log("PHOTO", files.photo);
-          if (files.photo.size > 10 * 1024 * 1024) {
-            return res.status(400).json({
-              error: "Image size should be less then 1 MB",
-            });
-          }
-  
-          course.photo.data = fs.readFileSync(files.photo.path);
-          course.photo.contentType = files.photo.type;
+  // Basic Setup
+  let form = new formidable.IncomingForm();
+  form.keepExtensions = true;
+
+  // Form Parsing
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      console.log("Error parsing the files");
+      return res.status(400).json({
+        status: "Fail",
+        message: "There was an error parsing the files",
+        error: err,
+      });
+    }
+
+    const { error: validationError } = updateCourseSchema.validate(fields);
+    if (validationError) {
+      return res
+        .status(400)
+        .json({ status: "Fail", message: validationError.details[0].message });
+    }
+
+    const { name, authorName, fees, numberOfLectures, duration, rating } =
+      fields;
+
+    try {
+      let course = req.course;
+      course = _.extend(course, fields);
+
+      if (files.photo) {
+        // console.log("PHOTO", files.photo);
+        if (files.photo.size > 10 * 1024 * 1024) {
+          return res.status(400).json({
+            error: "Image size should be less then 1 MB",
+          });
         }
-  
-        await course.save();
-        return res.status(200).json(course);
-      } catch (err) {
-        console.log(err);
-        return res.status(500).json(err);
+
+        course.photo.data = fs.readFileSync(files.photo.path);
+        course.photo.contentType = files.photo.type;
       }
-    });
-  };
+
+      await course.save();
+      return res.status(200).json(course);
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json(err);
+    }
+  });
+};
 
 // @route DELETE api/admin/courses
 // @desc delete a course
@@ -162,5 +157,3 @@ exports.deleteCourse = async (req, res) => {
     return res.status(500).send(err.message);
   }
 };
-
-
